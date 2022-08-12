@@ -1,0 +1,49 @@
+package com.zsck.bot.http.kugou;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.zsck.bot.http.kugou.pojo.Author;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+/**
+ * @author QQ:825352674
+ * @date 2022/8/12 - 9:41
+ */
+@NoArgsConstructor
+@Data
+public class MusicDetail {
+    private String hash;
+    @JsonProperty("timelength")
+    private Integer timeLength;
+    @JsonProperty("filesize")
+    private Integer fileSize;
+    private String audioName;
+    private Integer haveAlbum;
+    private String albumName;
+    private String albumId;
+    private String img;
+    private String haveMv;
+    private String videoId;
+    private String authorName;
+    private String songName;
+    private String lyrics;
+    private String authorId;
+    private Integer privilege;
+    private String privilege2;
+    private String playUrl;
+    private List<Author> authors;
+    private Integer isFreePart;
+    private Integer bitrate;
+    private String recommendAlbumId;
+    private String storeType;
+    private String albumAudioId;
+    private Boolean hasPrivilege;
+    private String playBackupUrl;
+    private String showTips;
+
+    public MusicDetail(String showTips) {
+        this.showTips = showTips;
+    }
+}

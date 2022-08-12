@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://www.ehcache.org/ehcache.xsd">
+    <!--
+        磁盘存储:将缓存中暂时不使用的对象,转移到硬盘,类似于Windows系统的虚拟内存
+        path:指定在硬盘上存储对象的路径
+        path可以配置的目录有：
+        user.home（用户的家目录）
+        user.dir（用户当前的工作目录）
+        java.io.tmpdir（默认的临时目录）
+        ehcache.disk.store.dir（ehcache的配置目录）
+        绝对路径（如：d:\\ehcache）
+        查看路径方法：String tmpDir = System.getProperty("java.io.tmpdir");
+     -->
+    <diskStore path="java.io.tmpdir"/>
+
+    <!--
+        defaultCache:默认的缓存配置信息,如果不加特殊说明,则所有对象按照此配置项处理
+        maxElementsInMemory:设置了缓存的上限,最多存储多少个记录对象
+        eternal:代表对象是否永不过期 (指定true则下面两项配置需为0无限期)
+        timeToIdleSeconds:最大的发呆时间 /秒
+        timeToLiveSeconds:最大的存活时间 /秒
+        overflowToDisk:是否允许对象被写入到磁盘
+        说明：下列配置自缓存建立起600秒(10分钟)有效 。
+        在有效的600秒(10分钟)内，如果连续120秒(2分钟)未访问缓存，则缓存失效。
+        就算有访问，也只会存活600秒。
+     -->
+    <defaultCache maxElementsInMemory="10000"
+                  timeToIdleSeconds="600"
+                  timeToLiveSeconds="600"
+                  overflowToDisk="true">
+    </defaultCache>
+
+    <!--
+        maxElementsInMemory，内存缓存中最多可以存放的元素数量,若放入Cache中的元素超过这个数值,则有以下两种情况
+                            1)若overflowToDisk=true,则会将Cache中多出的元素放入磁盘文件中
+                            2)若overflowToDisk=false,则根据memoryStoreEvictionPolicy策略替换Cache中原有的元素
+        eternal，            缓存中对象是否永久有效
+        timeToIdleSeconds，  缓存数据在失效前的允许闲置时间(单位:秒)，仅当eternal=false时使用,默认值是0表示可闲置时间无穷大,若超过这个时间没有访问此Cache中的某个元素,那么此元素将被从Cache中清除
+        timeToLiveSeconds，  缓存数据的总的存活时间（单位：秒），仅当eternal=false时使用，从创建开始计时，失效结束
+        maxElementsOnDisk，  磁盘缓存中最多可以存放的元素数量,0表示无穷大
+        overflowToDisk，     内存不足时,是否启用磁盘缓存
+        diskExpiryThreadIntervalSeconds，    磁盘缓存的清理线程运行间隔,默认是120秒
+        memoryStoreEvictionPolicy，  内存存储与释放策略,即达到maxElementsInMemory限制时,Ehcache会根据指定策略清理内存  共有三种策略,分别为LRU(最近最少使用)、LFU(最常用的)、FIFO(先进先出)
+    <persistence strategy="localTempSwap"/>
+    -->
+    <cache name="detail"
+           statistics="true"
+           maxElementsInMemory="10000"
+           timeToIdleSeconds="120"
+           timeToLiveSeconds="120"
+           maxElementsOnDisk="10000000"
+           diskExpiryThreadIntervalSeconds="120"
+           overflowToDisk="true"
+           memoryStoreEvictionPolicy="LRU">
+    </cache>
+  <cache name="schedule"
+           statistics="true"
+           maxElementsInMemory="10000"
+           timeToIdleSeconds="120"
+           timeToLiveSeconds="120"
+           maxElementsOnDisk="10000000"
+           diskExpiryThreadIntervalSeconds="120"
+           overflowToDisk="true"
+           memoryStoreEvictionPolicy="LRU">
+    </cache>
+
+</ehcache>

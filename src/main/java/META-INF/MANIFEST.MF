@@ -1,0 +1,57 @@
+Manifest-Version: 1.0
+Main-Class: com.zsck.bot.SimbotApplication
+Class-Path: spring-boot-starter-logging-2.7.1.jar netty-codec-smtp-4.1.7
+ 8.Final.jar hutool-crypto-5.5.1.jar ioc-1.0.7.jar component-mirai-sprin
+ g-boot-starter-2.3.4.jar mirai-core-api-jvm-2.8.2.jar netty-resolver-dn
+ s-classes-macos-4.1.78.Final.jar netty-resolver-dns-4.1.78.Final.jar ko
+ tlin-reflect-1.6.21.jar jackson-datatype-jsr310-2.13.3.jar kotlin-stdli
+ b-common-1.6.21.jar ktor-io-jvm-1.6.2.jar netty-transport-native-epoll-
+ 4.1.78.Final-linux-x86_64.jar netty-transport-4.1.78.Final.jar netty-co
+ dec-xml-4.1.78.Final.jar netty-resolver-dns-native-macos-4.1.78.Final-o
+ sx-aarch_64.jar spring-boot-configuration-processor-2.7.1.jar netty-all
+ -4.1.78.Final.jar netty-transport-rxtx-4.1.78.Final.jar annotations-13.
+ 0.jar kotlinx-serialization-json-jvm-1.2.2.jar netty-transport-sctp-4.1
+ .78.Final.jar netty-codec-socks-4.1.78.Final.jar httpcore-4.4.15.jar co
+ mmons-codec-1.15.jar core-2.3.4.jar mybatis-spring-boot-autoconfigure-2
+ .2.2.jar netty-transport-classes-epoll-4.1.78.Final.jar HikariCP-4.0.3.
+ jar jackson-databind-2.13.3.jar json-core-2.3.4.jar netty-handler-4.1.7
+ 8.Final.jar spring-boot-starter-json-2.7.1.jar netty-handler-proxy-4.1.
+ 78.Final.jar spring-web-5.3.21.jar kotlinx-serialization-core-jvm-1.2.2
+ .jar kotlinx-serialization-protobuf-jvm-1.2.2.jar spring-jdbc-5.3.21.ja
+ r snakeyaml-1.30.jar catcode-1.0.0-BETA.1.jar httpclient-4.5.13.jar spr
+ ing-boot-starter-jdbc-2.7.1.jar language-1.0.7.jar netty-transport-clas
+ ses-kqueue-4.1.78.Final.jar spring-beans-5.3.21.jar ktor-client-core-jv
+ m-1.6.2.jar kotlinx-coroutines-core-1.6.3.jar fastjson-1.2.75.jar confi
+ guration-1.0.7.jar bcprov-jdk15to18-1.69.jar lombok-1.18.24.jar log4j-t
+ o-slf4j-2.17.2.jar api-2.3.4.jar core-spring-boot-starter-2.3.4.jar kto
+ r-http-cio-jvm-1.6.2.jar logback-classic-1.2.11.jar component-mirai-2.3
+ .4.jar netty-transport-native-epoll-4.1.78.Final-linux-aarch_64.jar net
+ ty-codec-http2-4.1.78.Final.jar spring-boot-autoconfigure-2.7.1.jar log
+ 4j-api-2.17.2.jar mirai-core-utils-jvm-2.8.2.jar netty-transport-native
+ -unix-common-4.1.78.Final.jar netty-codec-haproxy-4.1.78.Final.jar bcpr
+ ov-jdk15on-1.64.jar utils-1.0.7.jar logback-core-1.2.11.jar spring-aop-
+ 5.3.21.jar atomicfu-jvm-0.16.3.jar kotlinx-io-0.1.16.jar netty-resolver
+ -4.1.78.Final.jar netty-resolver-dns-native-macos-4.1.78.Final-osx-x86_
+ 64.jar netty-codec-http-4.1.78.Final.jar netty-codec-redis-4.1.78.Final
+ .jar ktor-client-okhttp-1.6.2.jar jackson-annotations-2.13.3.jar netty-
+ codec-dns-4.1.78.Final.jar spring-jcl-5.3.21.jar kotlin-jvm-blocking-br
+ idge-jvm-1.10.6-1530.2.jar ktor-utils-jvm-1.6.2.jar jakarta.annotation-
+ api-1.3.5.jar ktor-http-jvm-1.6.2.jar jackson-dataformat-yaml-2.13.3.ja
+ r okio-2.8.0.jar spring-boot-starter-2.7.1.jar ktor-network-jvm-1.6.2.j
+ ar spring-context-5.3.21.jar myutil-1.0-SNAPSHOT.jar mirai-core-jvm-2.8
+ .2.jar jul-to-slf4j-1.7.36.jar client-core-2.3.4.jar netty-common-4.1.7
+ 8.Final.jar kotlinx-coroutines-jdk8-1.6.3.jar jackson-core-2.13.3.jar n
+ etty-codec-stomp-4.1.78.Final.jar kotlin-stdlib-jdk7-1.6.21.jar okhttp-
+ 4.9.3.jar mybatis-spring-2.0.7.jar netty-buffer-4.1.78.Final.jar json-f
+ astjson-2.3.4.jar kotlinx-io-jvm-0.1.16.jar kotlinx-coroutines-core-jvm
+ -1.6.3.jar mysql-connector-java-8.0.29.jar spring-tx-5.3.21.jar client-
+ ktor-2.3.4.jar jackson-module-parameter-names-2.13.3.jar netty-codec-4.
+ 1.78.Final.jar spring-boot-2.7.1.jar netty-transport-native-kqueue-4.1.
+ 78.Final-osx-aarch_64.jar spring-core-5.3.21.jar kotlin-stdlib-jdk8-1.6
+ .21.jar netty-transport-udt-4.1.78.Final.jar mybatis-spring-boot-starte
+ r-2.2.2.jar spring-expression-5.3.21.jar hutool-core-5.5.1.jar mybatis-
+ 3.5.9.jar slf4j-api-1.7.36.jar netty-codec-memcache-4.1.78.Final.jar ja
+ ckson-datatype-jdk8-2.13.3.jar druid-1.2.11.jar kotlin-stdlib-1.6.21.ja
+ r netty-transport-native-kqueue-4.1.78.Final-osx-x86_64.jar netty-codec
+ -mqtt-4.1.78.Final.jar
+
