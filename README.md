@@ -1,7 +1,7 @@
 # little-bot
 基于[Simpler Robot](https://github.com/ForteScarlet/simpler-robot/tree/v2-dev)的群聊机器人项目, [v2]
 # 功能
-酷狗点歌并以qq语音形式发送到群聊
+酷狗点歌并以qq语音形式发送到群聊（tip:电脑端无法播放，手机端正常）
 发送随机图片到qq群聊(从本地)
 私聊发送huft课表(自用，可忽略)
 
