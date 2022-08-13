@@ -1,7 +1,7 @@
 package com.zsck.bot.mybatis.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.zsck.bot.http.Academic.pojo.ClassMap;
+import com.zsck.bot.http.academic.pojo.ClassMap;
 import org.apache.ibatis.annotations.Mapper;
 
 /**

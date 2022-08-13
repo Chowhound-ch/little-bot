@@ -1,10 +1,10 @@
-package com.zsck.bot.http.Academic;
+package com.zsck.bot.http.academic;
 
 import cn.hutool.core.io.IoUtil;
-import com.zsck.bot.http.Academic.pojo.ClassMap;
-import com.zsck.bot.http.Academic.pojo.Schedule;
-import com.zsck.bot.http.Academic.service.ClassNameService;
-import com.zsck.bot.http.Academic.service.ScheduleService;
+import com.zsck.bot.http.academic.pojo.ClassMap;
+import com.zsck.bot.http.academic.pojo.Schedule;
+import com.zsck.bot.http.academic.service.ClassNameService;
+import com.zsck.bot.http.academic.service.ScheduleService;
 import com.zsck.bot.util.DataUtil;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.http.HttpHeaders;

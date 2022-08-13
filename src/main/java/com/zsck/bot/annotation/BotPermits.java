@@ -1,5 +1,7 @@
 package com.zsck.bot.annotation;
 
+import com.zsck.bot.enums.Permit;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -15,6 +17,6 @@ public @interface BotPermits {
     /**
      * 控制权限
      */
-    String value();
+    Permit value();
 
 }

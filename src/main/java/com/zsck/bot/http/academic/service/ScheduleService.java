@@ -1,7 +1,7 @@
-package com.zsck.bot.http.Academic.service;
+package com.zsck.bot.http.academic.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.zsck.bot.http.Academic.pojo.Schedule;
+import com.zsck.bot.http.academic.pojo.Schedule;
 
 import java.sql.Date;
 import java.util.List;

@@ -1,12 +1,13 @@
 package com.zsck.bot.mybatis.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.zsck.bot.http.academic.pojo.Schedule;
+import com.zsck.bot.http.kugou.pojo.Music;
 import org.apache.ibatis.annotations.Mapper;
+
 /**
  * @author QQ:825352674
- * @date 2022/7/23 - 15:12
+ * @date 2022/8/12 - 21:11
  */
 @Mapper
-public interface ScheduleMapper extends BaseMapper<Schedule> {
+public interface MusicMapper extends BaseMapper<Music> {
 }

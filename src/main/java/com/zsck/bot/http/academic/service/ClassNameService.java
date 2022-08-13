@@ -1,7 +1,7 @@
-package com.zsck.bot.http.Academic.service;
+package com.zsck.bot.http.academic.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.zsck.bot.http.Academic.pojo.ClassMap;
+import com.zsck.bot.http.academic.pojo.ClassMap;
 
 /**
  * @author QQ:825352674

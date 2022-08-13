@@ -1,12 +1,13 @@
-package com.zsck.bot.http.Academic.pri;
+package com.zsck.bot.http.academic.pri;
 
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import com.zsck.bot.annotation.BotPermits;
-import com.zsck.bot.http.Academic.Academic;
-import com.zsck.bot.http.Academic.pojo.Schedule;
-import com.zsck.bot.http.Academic.service.ClassNameService;
-import com.zsck.bot.http.Academic.service.ScheduleService;
+import com.zsck.bot.enums.Permit;
+import com.zsck.bot.http.academic.Academic;
+import com.zsck.bot.http.academic.pojo.Schedule;
+import com.zsck.bot.http.academic.service.ClassNameService;
+import com.zsck.bot.http.academic.service.ScheduleService;
 import com.zsck.bot.util.Resolver;
 import love.forte.simbot.annotation.Filter;
 import love.forte.simbot.annotation.OnPrivate;
@@ -106,7 +107,7 @@ public class PrivateListener {
         }
         Resolver.sendCourseDetail(qqNumber , sender , scheduleList);
     }
-    @BotPermits("")
+    @BotPermits(Permit.HOST)
     @Transactional
     @Filter(value = "刷新" , matchType = MatchType.EQUALS)
     @OnPrivate

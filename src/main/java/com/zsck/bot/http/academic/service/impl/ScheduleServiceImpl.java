@@ -1,11 +1,11 @@
-package com.zsck.bot.http.Academic.service.impl;
+package com.zsck.bot.http.academic.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zsck.bot.mybatis.mapper.ScheduleMapper;
-import com.zsck.bot.http.Academic.pojo.Schedule;
-import com.zsck.bot.http.Academic.service.ScheduleService;
+import com.zsck.bot.http.academic.pojo.Schedule;
+import com.zsck.bot.http.academic.service.ScheduleService;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 

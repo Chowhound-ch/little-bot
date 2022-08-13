@@ -1,8 +1,8 @@
 package com.zsck.bot.util;
 
 import cn.hutool.core.date.DateUtil;
-import com.zsck.bot.http.Academic.pojo.Schedule;
-import com.zsck.bot.http.Academic.service.ClassNameService;
+import com.zsck.bot.http.academic.pojo.Schedule;
+import com.zsck.bot.http.academic.service.ClassNameService;
 import love.forte.simbot.api.message.MessageContentBuilder;
 import love.forte.simbot.api.message.MessageContentBuilderFactory;
 import love.forte.simbot.api.sender.MsgSender;

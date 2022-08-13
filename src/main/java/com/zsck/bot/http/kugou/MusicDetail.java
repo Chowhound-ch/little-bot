@@ -2,6 +2,7 @@ package com.zsck.bot.http.kugou;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.zsck.bot.http.kugou.pojo.Author;
+import com.zsck.bot.http.kugou.pojo.Music;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,21 +14,15 @@ import java.util.List;
  */
 @NoArgsConstructor
 @Data
-public class MusicDetail {
+public class MusicDetail extends Music {
     private String hash;
-    @JsonProperty("timelength")
-    private Integer timeLength;
     @JsonProperty("filesize")
     private Integer fileSize;
-    private String audioName;
     private Integer haveAlbum;
     private String albumName;
     private String albumId;
-    private String img;
     private String haveMv;
     private String videoId;
-    private String authorName;
-    private String songName;
     private String lyrics;
     private String authorId;
     private Integer privilege;
@@ -41,9 +36,8 @@ public class MusicDetail {
     private String albumAudioId;
     private Boolean hasPrivilege;
     private String playBackupUrl;
-    private String showTips;
 
-    public MusicDetail(String showTips) {
-        this.showTips = showTips;
+    public MusicDetail(String tip) {
+        super(tip);
     }
 }

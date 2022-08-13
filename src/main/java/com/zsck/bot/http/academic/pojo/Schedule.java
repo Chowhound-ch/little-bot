@@ -1,8 +1,7 @@
-package com.zsck.bot.http.Academic.pojo;
+package com.zsck.bot.http.academic.pojo;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.sql.Date;
 

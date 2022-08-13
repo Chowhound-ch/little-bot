@@ -1,20 +1,31 @@
 package com.zsck.bot.http.kugou;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.net.URLEncodeUtil;
 import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.druid.sql.ast.statement.SQLIfStatement;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zsck.bot.http.kugou.pojo.Music;
+import com.zsck.bot.http.kugou.service.MusicService;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.intellij.lang.annotations.JdkConstants;
+import org.jaudiotagger.audio.AudioFileIO;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -23,7 +34,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -31,12 +41,18 @@ import java.util.List;
  * @date 2022/8/11 - 19:33
  */
 
+@Slf4j
 @Component
 public class KuGouMusic {
-
     public static String path;
     private static ObjectMapper mapper;
-    private static Integer perFileSize;//建议1MB(默认)时长约 1:05
+
+    private static MusicService musicService;
+
+    @Autowired
+    public void setMusicService(MusicService musicService) {
+        KuGouMusic.musicService = musicService;
+    }
 
     @Resource
     public void setMapper(ObjectMapper mapper) {
@@ -45,7 +61,6 @@ public class KuGouMusic {
     @PostConstruct
     private void init(){
         path = ClassUtil.getClassPath()+"/temp/music/";
-        perFileSize = 1024 * 1024;
     }
 
     public static List<String> getFileName(String keyWord){
@@ -59,15 +74,19 @@ public class KuGouMusic {
                     .optJSONObject("data")
                     .optJSONArray("lists")
                     .optJSONObject(0);
-            //准备发送下一个请求
+            //准备发送下一个请求获取mp3文件
             MusicDetail musicDetail = getMusicDetail(searchFirst, httpClient);
+
             List<String> list = new ArrayList<>();
-            if (musicDetail.getShowTips() != null){
+            if (musicDetail.getTip() != null){
                 return readyForSender(list, musicDetail);
             }
             mp3File = httpClient.execute(new HttpGet(musicDetail.getPlayBackupUrl()));
             byte[] bytes = EntityUtils.toByteArray(mp3File.getEntity());
-            List<String> fileList = keep(bytes, musicDetail.getAudioName());
+            musicDetail.setMd5(DigestUtils.md5Hex(bytes));//保存mp3二进制流的md5加密
+            musicDetail.setTime(musicDetail.getIsFreePart() == 1 ? 60 : musicDetail.getTime() / 1000);//单位化为 秒
+            keepMusicToDB(musicDetail);
+            List<String> fileList = keep(bytes, musicDetail.getAudioName(), musicDetail.getTime());
             return readyForSender(fileList, musicDetail);
         } catch (IOException e) {
             e.printStackTrace();
@@ -78,28 +97,36 @@ public class KuGouMusic {
         }
         return null;
     }
+
     private static List<String> readyForSender(List<String> fileList, MusicDetail musicDetail){
-        List<String> list = new ArrayList<>();
-        list.add("歌曲:" + (StrUtil.isBlankOrUndefined(musicDetail.getSongName())? "无法获取" :musicDetail.getSongName()));
-        list.add("歌手:" + musicDetail.getAuthorName());
-        if (!StrUtil.isBlankOrUndefined(musicDetail.getShowTips())){
-            list.add(musicDetail.getShowTips());
-            return list;
-        }else {
-            list.add("url:" + musicDetail.getImg());
-            if (musicDetail.getIsFreePart() == 1){
-                list.add("tip: 歌曲为付费歌曲，仅可试听1分钟.欲听完整版请前往酷狗音乐app开通VIP");
-            }
-        }
+        List<String> list = getReady(musicDetail, musicDetail.getIsFreePart());
         list.addAll(fileList);
         return list;
     }
-    private static List<String> keep(byte[] bytes, String audioName){
+    public static List<String> getReady(Music music, @Nullable Integer isPartFree/*默认0*/){
+        List<String> list = new ArrayList<>();
+        list.add("歌曲:" + (StrUtil.isBlankOrUndefined(music.getSongName())? "无法获取" :music.getSongName()));
+        list.add("歌手:" + music.getAuthor());
+        if (!StrUtil.isBlankOrUndefined(music.getTip())){
+            list.add(music.getTip());
+            return list;
+        }else {
+            if (!StrUtil.isBlankOrUndefined(music.getImgUrl())) {
+                list.add("url:" + music.getImgUrl());
+            }
+            if (isPartFree == 1){
+                list.add("tip: 歌曲为付费歌曲，仅可试听1分钟.欲听完整版请前往酷狗音乐app开通VIP");
+            }
+        }
+        return list;
+    }
+    public static List<String> keep(byte[] bytes, String audioName, Integer time){
         isExist(audioName);
         ByteBuffer wrap = ByteBuffer.wrap(bytes);
         List<String> fileList = new ArrayList<>();
+        Integer perFileSize = bytes.length / (time/61 + 1);
         for (int i = 0; true ; i++) {
-            if (i * perFileSize >bytes.length){
+            if (i * perFileSize >bytes.length -perFileSize * 0.05){//若最后多出perFileSize * 0.05则忽略不计(实测最后若多出小部分会导致最后部分无法播放)
                 break;
             }
             String fileName = audioName + "/" + audioName + "-"+i+ ".mp3";
@@ -119,7 +146,19 @@ public class KuGouMusic {
                 e.printStackTrace();
             }
         }
+        log.info("新增歌曲: {}" , audioName + ".mp3");
         return fileList;
+    }
+    public static boolean keepMusicToDB(Music detail){
+        //文件存在则先删除，以更新MP3文件
+        if (FileUtil.exist(path + detail.getAudioName()+"/")){
+            FileUtil.del(path + detail.getAudioName());
+            log.info("更新歌曲: {}", detail.getAudioName()+".mp3");
+        }
+        LambdaQueryWrapper<Music> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Music::getAudioName, detail.getAudioName());
+        musicService.remove(wrapper);//删除原有行
+        return musicService.saveOrUpdate(detail);
     }
     private static List<String> isExist(String musicName){
         File file = new File(   path+ musicName + "/");
@@ -147,12 +186,12 @@ public class KuGouMusic {
             if (!StrUtil.isBlankOrUndefined(res.optString("show_tips"))){
                 MusicDetail musicDetail = new MusicDetail("歌曲只能在酷狗客户端播放或无法试听");
                 musicDetail.setSongName(res.optString("songname"));
-                musicDetail.setAuthorName(res.optString("author_name"));
+                musicDetail.setAuthor(res.optString("author_name"));
                 return musicDetail;
             }else {
                 MusicDetail musicDetail = mapper.readValue(res.optJSONObject("data").toString(), MusicDetail.class);
                 if (StrUtil.isBlankOrUndefined(musicDetail.getPlayBackupUrl())){
-                    musicDetail.setShowTips("歌曲只能在酷狗客户端播放或无法试听");
+                    musicDetail.setTip("歌曲只能在酷狗客户端播放或无法试听");
                 }
                 return musicDetail;
             }

@@ -1,9 +1,9 @@
-package com.zsck.bot.http.Academic.timing;
+package com.zsck.bot.http.academic.timing;
 
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
-import com.zsck.bot.http.Academic.pojo.Schedule;
-import com.zsck.bot.http.Academic.service.ScheduleService;
+import com.zsck.bot.http.academic.pojo.Schedule;
+import com.zsck.bot.http.academic.service.ScheduleService;
 import com.zsck.bot.util.DataUtil;
 import com.zsck.bot.util.Resolver;
 import love.forte.simbot.bot.Bot;

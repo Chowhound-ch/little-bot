@@ -1,8 +1,6 @@
 package com.zsck.bot.http.kugou;
 
 import cn.hutool.core.net.URLEncodeUtil;
-import com.sun.jndi.toolkit.url.Uri;
-import com.sun.org.apache.xerces.internal.util.URI;
 
 import java.util.ArrayList;
 import java.util.Arrays;
