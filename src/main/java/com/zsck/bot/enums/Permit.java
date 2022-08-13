@@ -17,7 +17,7 @@ public enum Permit {
 
     private final Integer value;
     private static Map<String , Permit> nameMap;
-    private static Map<Integer , Permit> valueMap;
+    private final static Map<Integer , Permit> valueMap;
     static {
         Permit.nameMap = EnumUtil.getEnumMap(Permit.class);
         valueMap = new HashMap<>();
@@ -33,8 +33,8 @@ public enum Permit {
     public Integer getValue() {
         return value;
     }
-    public static String getName(Integer value){
-        return valueMap.get(value).name();
+    public static Permit getEnumByValue(Integer value){
+        return valueMap.get(value);
     }
     public static Permit getEnumByName(String name){
         return nameMap.get(name);

@@ -181,11 +181,11 @@ public class GroupListener {
         }
         if ( detail.getPermit() != position){
             detail.setPermit(position);
-            senderHelper.senderMsg("已将[" + detail.getQqNumber() +"]权限设置为" + Permit.getName(position));
+            senderHelper.senderMsg("已将[" + detail.getQqNumber() +"]权限设置为" + Permit.getEnumByValue(position).name());
             permitDetailService.saveOrUpdate(detail);
             log.info("权限变更: [{}]({}) -> {}", detail.getQqNumber(), detail.getPermit(), position);
         }else {
-            senderHelper.senderMsg("["+ detail.getQqNumber() + "]权限已是" + Permit.getName(position) + "不能重复设置");
+            senderHelper.senderMsg("["+ detail.getQqNumber() + "]权限已是" + Permit.getEnumByValue(position).name() + "不能重复设置");
         }
     }
     public List<String> sortMusicFiles(List<String> fileNames){

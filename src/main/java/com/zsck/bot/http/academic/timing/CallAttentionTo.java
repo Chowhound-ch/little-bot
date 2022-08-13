@@ -11,6 +11,7 @@ import love.forte.simbot.bot.BotManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -39,7 +40,8 @@ public class CallAttentionTo {
     @Autowired
     private ScheduleService scheduleService;
     private ScheduledExecutorService scheduledExecutorService;
-
+    @Value("${com.zsck.data.host}")
+    private String host;
     @PostConstruct
     private void init(){
         scheduledExecutorService = Executors.newScheduledThreadPool(5);
@@ -53,7 +55,7 @@ public class CallAttentionTo {
         Date firstDate = scheduleService.getFirstDate();
         Date date = Date.valueOf(DateUtil.today());
         if (date.before(firstDate)) {
-            bot.getSender().SENDER.sendPrivateMsg(DataUtil.host, "当前正处于假期，距离开学还有" +DateUtil.between(date , firstDate , DateUnit.DAY , true) + "天" );
+            bot.getSender().SENDER.sendPrivateMsg(host, "当前正处于假期，距离开学还有" +DateUtil.between(date , firstDate , DateUnit.DAY , true) + "天" );
         }else {
             long gap = DateUtil.between(firstDate, date, DateUnit.DAY, true);
             List<Schedule> scheduleList = scheduleService.getScheduleByDate(date);
@@ -69,8 +71,8 @@ public class CallAttentionTo {
                     return;
                 }
             }
-            bot.getSender().SENDER.sendPrivateMsg(DataUtil.host , "今日为:" + date +",本周为第:" + (gap/7 + 1) + "周");
-            Resolver.sendCourseDetail(DataUtil.host , bot.getSender() , scheduleList);
+            bot.getSender().SENDER.sendPrivateMsg(host , "今日为:" + date +",本周为第:" + (gap/7 + 1) + "周");
+            Resolver.sendCourseDetail(host , bot.getSender() , scheduleList);
         }
     }
     @Scheduled(cron = "0 0 22 * * 1,2,3,4,7")

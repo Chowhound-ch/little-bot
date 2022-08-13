@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Configuration;
 public class DataUtil {
     public static String userName;
     public static String pwd;
-    public static String host;
     public static String filePath;
 
     public void setFilePath(String filePath) {
@@ -27,7 +26,4 @@ public class DataUtil {
         DataUtil.pwd = pwd;
     }
 
-    public void setHost(String host) {
-        DataUtil.host = host;
-    }
 }
