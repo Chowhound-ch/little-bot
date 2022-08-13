@@ -2,7 +2,10 @@ package com.zsck.bot.group;
 
 import catcode.CatCodeUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.CharUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
+import com.alibaba.druid.sql.visitor.functions.Char;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.zsck.bot.annotation.BotPermits;
 import com.zsck.bot.common.pojo.PermitDetail;
@@ -35,16 +38,14 @@ import org.jaudiotagger.audio.AudioFileIO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -78,8 +79,11 @@ public class GroupListener {
         if (fileNames == null) {//本地找不到，开始从酷狗搜索
             fileNames = KuGouMusic.getFileName(music);
         }
+        //实际测试中linux环境下读取文件夹下文件的顺序并不确定，故发送语音之前先排序
+        fileNames = sortMusicFiles(fileNames);
         MiraiMessageContentBuilder builder = factory.getMessageContentBuilder();
         List<String> catCodes = new ArrayList<>();
+
         List<String> filesForLambda = fileNames;//lambda中使用的变量必须未经更改,故此声明新变量
         builder.forwardMessage(forward->{
             for (String file : filesForLambda){
@@ -184,6 +188,21 @@ public class GroupListener {
             senderHelper.senderMsg("["+ detail.getQqNumber() + "]权限已是" + Permit.getName(position) + "不能重复设置");
         }
     }
+    public List<String> sortMusicFiles(List<String> fileNames){
+        Collections.sort(fileNames, (s1, s2)->{
+            if (s1.endsWith(".mp3") && s2.endsWith(".mp3")){
+                Integer i1 = Integer.parseInt(s1.substring(s1.length() - 5).substring(0, 1));
+                Integer i2 = Integer.parseInt(s2.substring(s2.length() - 5).substring(0, 1));
+                if (i1 > i2){
+                    return 1;
+                }else if (i1 < i2){
+                    return -1;
+                }
+            }
+            return 0;
+        });
+        return fileNames;
+    }
     private List<String> getMusicByKeyword(String key){
         Music music = getMusic(key);
         if (music != null){
@@ -195,7 +214,7 @@ public class GroupListener {
                 });//获取子文件夹内容
                 return list;
             } catch (IOException e) {
-                e.printStackTrace();
+                log.warn("数据库中有记录而不存在实际文件");
             }
         }
         return null;

@@ -4,7 +4,6 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-*.yaml
 
 ### STS ###
 .apt_generated

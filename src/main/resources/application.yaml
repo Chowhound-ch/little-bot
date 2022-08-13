@@ -1,0 +1,53 @@
+com:
+  zsck:
+    data:
+      user-name: ${USERNAME_ACADEMIC}
+      pwd: ${PWD_ACADEMIC}
+      host: ${HOST} #bot管理者qq
+      file-path: ${FILE_PATH} #图片存储位置
+simbot:
+  core:
+    bot-resource-type: both
+  component:
+    mirai:
+      protocol: ipad
+logging:
+  level:
+    com.zsck: info
+
+spring:
+  profiles:
+    include: data
+  aop:
+    auto: false
+  datasource:
+    url: ${MYSQL_URL}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      initial-size: 5
+      min-idle: 5
+      max-active: 20
+      max-wait: 60000
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 30000
+      validation-query: SELECT 1 FROM DUAL
+      test-while-idle: true
+      test-on-borrow: true
+      test-on-return: false
+  cache:
+    ehcache:
+      config: classpath:ehcache.xml
+    type: ehcache
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+    deserialization:
+      FAIL_ON_UNKNOWN_PROPERTIES: false
+mybatis-plus:
+  global-config:
+    db-config:
+      id-type: auto
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
