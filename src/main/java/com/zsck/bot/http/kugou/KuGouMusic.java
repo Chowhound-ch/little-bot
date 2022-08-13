@@ -84,9 +84,8 @@ public class KuGouMusic {
             mp3File = httpClient.execute(new HttpGet(musicDetail.getPlayBackupUrl()));
             byte[] bytes = EntityUtils.toByteArray(mp3File.getEntity());
             musicDetail.setMd5(DigestUtils.md5Hex(bytes));//保存mp3二进制流的md5加密
-            musicDetail.setTime(musicDetail.getIsFreePart() == 1 ? 60 : musicDetail.getTime() / 1000);//单位化为 秒
-            keepMusicToDB(musicDetail);
-            List<String> fileList = keep(bytes, musicDetail.getAudioName(), musicDetail.getTime());
+            musicDetail.setTime(musicDetail.getIsFreePart() == 1 ? 60 : musicDetail.getTime() / 1000);//单位化为 秒(爬取到的音乐时间单位为毫秒)
+            List<String> fileList = keepMusicToDB(musicDetail, bytes);
             return readyForSender(fileList, musicDetail);
         } catch (IOException e) {
             e.printStackTrace();
@@ -120,7 +119,7 @@ public class KuGouMusic {
         }
         return list;
     }
-    public static List<String> keep(byte[] bytes, String audioName, Integer time){
+    private static List<String> keep(byte[] bytes, String audioName, Integer time){
         isExist(audioName);
         ByteBuffer wrap = ByteBuffer.wrap(bytes);
         List<String> fileList = new ArrayList<>();
@@ -149,7 +148,7 @@ public class KuGouMusic {
         log.info("新增歌曲: {}" , audioName + ".mp3");
         return fileList;
     }
-    public static boolean keepMusicToDB(Music detail){
+    public static List<String> keepMusicToDB(Music detail, byte[] bytes){
         //文件存在则先删除，以更新MP3文件
         if (FileUtil.exist(path + detail.getAudioName()+"/")){
             FileUtil.del(path + detail.getAudioName());
@@ -158,7 +157,9 @@ public class KuGouMusic {
         LambdaQueryWrapper<Music> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Music::getAudioName, detail.getAudioName());
         musicService.remove(wrapper);//删除原有行
-        return musicService.saveOrUpdate(detail);
+        musicService.saveOrUpdate(detail);
+
+        return keep(bytes, detail.getAudioName(), detail.getTime());
     }
     private static List<String> isExist(String musicName){
         File file = new File(   path+ musicName + "/");

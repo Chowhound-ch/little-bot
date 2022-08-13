@@ -2,52 +2,49 @@ package com.zsck.bot.group;
 
 import catcode.CatCodeUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.math.BitStatusUtil;
-import cn.hutool.core.thread.ThreadUtil;
-import cn.hutool.core.util.ByteUtil;
-import cn.hutool.db.meta.MetaUtil;
 import cn.hutool.http.HttpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.zsck.bot.annotation.BotPermits;
+import com.zsck.bot.common.pojo.PermitDetail;
+import com.zsck.bot.common.service.PermitDetailService;
+import com.zsck.bot.enums.MsgType;
 import com.zsck.bot.enums.Permit;
 import com.zsck.bot.http.kugou.KuGouMusic;
 import com.zsck.bot.http.kugou.pojo.Music;
 import com.zsck.bot.http.kugou.service.MusicService;
 import com.zsck.bot.util.ContextUtil;
+import com.zsck.bot.util.MsgSenderHelper;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import love.forte.simbot.annotation.*;
 import love.forte.simbot.api.message.events.GroupMsg;
+import love.forte.simbot.api.message.events.MessageGet;
 import love.forte.simbot.api.message.results.FileResult;
 import love.forte.simbot.api.sender.AdditionalApi;
 import love.forte.simbot.api.sender.MsgSender;
+import love.forte.simbot.api.sender.Sender;
 import love.forte.simbot.component.mirai.additional.MiraiAdditionalApis;
+import love.forte.simbot.component.mirai.message.MiraiGroupMsgFlag;
 import love.forte.simbot.component.mirai.message.MiraiMessageContentBuilder;
 import love.forte.simbot.component.mirai.message.MiraiMessageContentBuilderFactory;
 import love.forte.simbot.filter.MatchType;
-import love.forte.simbot.listener.*;
+import love.forte.simbot.listener.ListenerContext;
+import love.forte.simbot.listener.ScopeContext;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
-import org.jaudiotagger.audio.AudioHeader;
-import org.jaudiotagger.audio.exceptions.CannotReadException;
-import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
-import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
-import org.jaudiotagger.audio.mp3.MP3File;
-import org.jaudiotagger.tag.TagException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Controller;
-
 
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.FileAttribute;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 /**
@@ -64,6 +61,8 @@ public class GroupListener {
     private CatCodeUtil codeUtil;
     @Autowired
     private MusicService musicService;
+    @Autowired
+    private PermitDetailService permitDetailService;
 
     @PostConstruct
     private void init(){
@@ -103,10 +102,90 @@ public class GroupListener {
             }
         }
     }
+    @OnGroup
+    public void setMP3File(MessageGet msgGet, MsgSender sender, ListenerContext context){
+        ScopeContext scopeContext = context.getContext(ListenerContext.Scope.GLOBAL);
+        MsgSenderHelper senderHelper = MsgSenderHelper.getInstance(msgGet, sender);//获取(私聊|群聊)消息发送器
+        String key = senderHelper.getNumber() + ":" + msgGet.getAccountInfo().getAccountCode() + ":添加歌曲";
+        String audioName = ((String) scopeContext.get(key));
+        if (audioName != null) {
+            String id = codeUtil.getParam(msgGet.getMsg(), "id");
+            if (id != null) {
+                AdditionalApi<FileResult> fileRes = MiraiAdditionalApis.GETTER.getGroupFileById(senderHelper.getNumber(), id,  true);
+                FileResult file = sender.GETTER.additionalExecute(fileRes);
+                //创建临时文件，以获取mp3文件的具体时长来确认如何分割二进制流以发送qq语音
+                File temp = new File(path + "temp.mp3");
+                HttpUtil.downloadFile(file.getValue().getUrl(), temp);
+                try {
+                    int time = AudioFileIO.read(temp).getAudioHeader().getTrackLength();
+                    byte[] bytes = Files.readAllBytes(temp.toPath());
+
+                    Music music = setParam(audioName,DigestUtils.md5Hex(bytes), time );
+                    KuGouMusic.keepMusicToDB(music, bytes);
+                    log.info("自定义歌曲: {}.mp3", audioName);
+                    senderHelper.senderMsg("添加自定义歌曲:" + audioName);
+                    scopeContext.remove(key);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    FileUtil.del(temp.toPath());//删除临时文件
+                }
+            }
+        }
+    }
+
+    @BotPermits(Permit.MANAGER)//例如: /添加 love story - TaylorSwifter
+    @Filter(value = "^/添加\\s*{{music,[^-]+}}\\s+-+\\s+{{author,[^-]+}}" , matchType = MatchType.REGEX_MATCHES)
+    @OnGroup
+    public void setMP3Detail(GroupMsg groupMsg, MsgSender sender,
+                             @FilterValue("music")String music,
+                             @FilterValue("author")String author,
+                             ListenerContext context){
+        ScopeContext scopeContext = context.getContext(ListenerContext.Scope.GLOBAL);
+        MsgSenderHelper senderHelper = MsgSenderHelper.getInstance(groupMsg, sender);
+        String key =senderHelper.getNumber() + ":" + groupMsg.getAccountInfo().getAccountCode() + ":添加歌曲";
+        senderHelper.senderMsg("请发送MP3文件");
+        scopeContext.set(key, author + " - " + music);
+        Runnable runnable = ()->{//开设线程，设置会话持续时间, 默认60s
+            try {
+                Thread.sleep(60000L);
+                if (scopeContext.remove(key) != null){
+                    senderHelper.senderMsg("会话超时，添加歌曲请再次发起会话");
+                    log.info("会话失效: {}",key);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        };
+        runnable.run();
+    }
+    @BotPermits(Permit.HOST)
+    @Filter(value = "^/设置权限\\s+{{position,(1|2)}}", matchType = MatchType.REGEX_MATCHES, anyAt = true)
+    @OnGroup
+    public void setPosition(GroupMsg groupMsg, MsgSender sender,
+                            @FilterValue("position")Integer position) {
+        LambdaQueryWrapper<PermitDetail> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(PermitDetail::getQqNumber, codeUtil.getParam(groupMsg.getMsg(), "code")/*获取被at人qq*/);
+        MsgSenderHelper senderHelper = MsgSenderHelper.getInstance(groupMsg, sender);
+        PermitDetail detail = permitDetailService.getOne(wrapper);
+        if (detail == null){
+            detail = new PermitDetail(senderHelper.getNumber(), 1);
+        }
+        if (groupMsg.getAccountInfo().getAccountCode().equals(detail.getQqNumber())) {
+            senderHelper.senderMsg("自己改自己权限是吧");
+            return;//操作人和被操作人不能为同一人
+        }
+        if ( detail.getPermit() != position){
+            detail.setPermit(position);
+            senderHelper.senderMsg("已将[" + detail.getQqNumber() +"]权限设置为" + Permit.getName(position));
+            permitDetailService.saveOrUpdate(detail);
+            log.info("权限变更: [{}]({}) -> {}", detail.getQqNumber(), detail.getPermit(), position);
+        }else {
+            senderHelper.senderMsg("["+ detail.getQqNumber() + "]权限已是" + Permit.getName(position) + "不能重复设置");
+        }
+    }
     private List<String> getMusicByKeyword(String key){
-        LambdaQueryWrapper<Music> wrapper = new LambdaQueryWrapper<>();
-        wrapper.like(Music::getAudioName , key);
-        Music music = musicService.getOne(wrapper);
+        Music music = getMusic(key);
         if (music != null){
             List<String> list = KuGouMusic.getReady(music, 0 );
             try {
@@ -121,66 +200,19 @@ public class GroupListener {
         }
         return null;
     }
-    //@OnlySession(group = "添加歌曲")
-    @OnGroup
-    public void setMP3File(GroupMsg groupMsg, MsgSender sender,ListenerContext context){
-        ScopeContext scopeContext = context.getContext(ListenerContext.Scope.GLOBAL);
-        String group = groupMsg.getGroupInfo().getGroupCode();
-        String key = group + ":" +groupMsg.getAccountInfo().getAccountCode() + ":添加歌曲";
-        String audioName = ((String) scopeContext.get(key));
-        if (audioName != null) {
-            String id = codeUtil.getParam(groupMsg.getMsg(), "id");
-            if (id != null) {
-                AdditionalApi<FileResult> fileRes = MiraiAdditionalApis.GETTER.getGroupFileById(group, id,  true);
-                FileResult file = sender.GETTER.additionalExecute(fileRes);
-                File temp = new File(path + "temp.mp3");
-                HttpUtil.downloadFile(file.getValue().getUrl(), temp);
-                try {
-                    int time = AudioFileIO.read(temp).getAudioHeader().getTrackLength();
-                    Music music = new Music();
-                    String[] audioAndName = audioName.split(" - ");
-                    music.setAudioName(audioName);
-                    music.setAuthor(audioAndName[0]);
-                    music.setSongName(audioAndName[1]);
-                    music.setTime(time);
-                    byte[] bytes = Files.readAllBytes(temp.toPath());
-                    music.setMd5(DigestUtils.md5Hex(bytes));
-                    KuGouMusic.keepMusicToDB(music);
-                    KuGouMusic.keep(bytes, audioName , time);
-                    log.info("自定义歌曲: {}.mp3", audioName);
-                    sender.SENDER.sendGroupMsg(group, "添加自定义歌曲:" + audioName);
-                    scopeContext.remove(key);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+    private Music getMusic(String key){
+        LambdaQueryWrapper<Music> wrapper = new LambdaQueryWrapper<>();
+        wrapper.like(Music::getAudioName , key);
+        return musicService.getOne(wrapper);
     }
-
-    //@BotPermits(Permit.MANAGER)
-    @Filter(value = "^/添加\\s*{{music,\\S+}}\\s+{{author,\\S+}}" , matchType = MatchType.REGEX_MATCHES)
-    @OnGroup
-    public void setMP3Detail(GroupMsg groupMsg, MsgSender sender,
-                         @FilterValue("music")String music,
-                         @FilterValue("author")String author,
-                         ListenerContext context){
-        ScopeContext scopeContext = context.getContext(ListenerContext.Scope.GLOBAL);
-        String group = groupMsg.getGroupInfo().getGroupCode();
-        String key = group + ":" +groupMsg.getAccountInfo().getAccountCode() + ":添加歌曲";
-        sender.SENDER.sendGroupMsg(group , "请发送MP3文件");
-        scopeContext.set(key, author + " - " + music);
-        Runnable runnable = ()->{
-            try {
-                Thread.sleep(60000L);
-                if (scopeContext.remove(key) != null){
-                    sender.SENDER.sendGroupMsg(group , "会话超时，添加歌曲请再次发起会话");
-                    log.info("会话失效: {}",key);
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        };
-        runnable.run();
+    private Music setParam(String audioName, String md5, Integer time){
+        Music music = new Music();
+        String[] audioAndName = audioName.split(" - ");
+        music.setAudioName(audioName);
+        music.setAuthor(audioAndName[0]);
+        music.setSongName(audioAndName[1]);
+        music.setTime(time);
+        music.setMd5(md5);
+        return music;
     }
-
 }

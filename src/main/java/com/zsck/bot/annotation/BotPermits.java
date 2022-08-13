@@ -18,5 +18,4 @@ public @interface BotPermits {
      * 控制权限
      */
     Permit value();
-
 }
