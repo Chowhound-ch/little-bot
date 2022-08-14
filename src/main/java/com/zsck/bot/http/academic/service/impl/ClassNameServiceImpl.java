@@ -16,7 +16,6 @@ import java.util.Map;
  * @author QQ:825352674
  * @date 2022/7/23 - 15:52
  */
-@CacheConfig(cacheNames = "detail")
 @Service
 public class ClassNameServiceImpl extends ServiceImpl<ClassMapMapper , ClassMap>
         implements ClassNameService {
@@ -34,25 +33,5 @@ public class ClassNameServiceImpl extends ServiceImpl<ClassMapMapper , ClassMap>
     public String getClassName(Integer lessonId) {
         return classNameMap.get(lessonId);
     }
-//    @Autowired
-//    private ClassMapMapper classMapMapper;
-
-
-//
-//    @Override
-//    public Integer keepDate(Map<Integer, String> map) {
-//        return classMapMapper.keepAllMap(map);
-//    }
-//
-//    @Cacheable(key = "#lessonId")
-//    public String getClassName(Integer lessonId){
-//        return classNameMap.get(lessonId);
-//    }
-//    @CacheEvict(allEntries = true)
-//    public Integer deleteAll(){
-//        classNameMap = null;
-//        init();
-//        return classMapMapper.deleteAll();
-//    }
 
 }

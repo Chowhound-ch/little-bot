@@ -25,7 +25,6 @@ import javax.annotation.PostConstruct;
  * @author QQ:825352674
  * @date 2022/7/15 - 0:05
  */
-@DependsOn("dataUtil")
 @Component
 public class PermitsIntercept implements ListenerInterceptor {
     @Autowired

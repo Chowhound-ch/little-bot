@@ -8,7 +8,5 @@ import com.zsck.bot.http.academic.pojo.ClassMap;
  * @date 2022/7/23 - 17:54
  */
 public interface ClassNameService extends IService<ClassMap> {
-//    Integer keepDate(Map<Integer , String> map);
        String getClassName(Integer lessonId);
-//    Integer deleteAll();
 }

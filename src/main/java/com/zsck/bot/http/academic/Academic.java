@@ -18,10 +18,12 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.configurationprocessor.json.JSONArray;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -43,7 +45,10 @@ public class Academic {
     private ScheduleService scheduleService;
     @Autowired
     private ClassNameService classNameService;
-
+    @Value("${com.zsck.data.user-name}")
+    private String userName;
+    @Value("${com.zsck.data.pwd}")
+    private String pwd;
 
     public void init(){
         JSONArray lessons;
@@ -61,13 +66,13 @@ public class Academic {
             //访问中间网址，获取会话cookie和加密密钥
             prepareForKey = httpClient.execute(httpGet);
             String salt = EntityUtils.toString(prepareForKey.getEntity());//密钥
-            String encode = DigestUtils.sha1Hex(salt+"-" + DataUtil.pwd);//密码加密
+            String encode = DigestUtils.sha1Hex(salt+"-" + pwd);//密码加密
             //登录验证
             HttpPost post = new HttpPost("http://jxglstu.hfut.edu.cn/eams5-student/login");
             post.setHeader(HttpHeaders.ACCEPT , "*/*");
             post.setHeader( HttpHeaders.USER_AGENT, USERAGENT);
             post.setHeader(HttpHeaders.REFERER , REFERER);
-            JSONObject jsonObject = new JSONObject("{\"username\":\"" + DataUtil.userName + "\",\"password\":\""+encode+"\",\"captcha\":\"\"}");
+            JSONObject jsonObject = new JSONObject("{\"username\":\"" + userName + "\",\"password\":\""+encode+"\",\"captcha\":\"\"}");
             StringEntity entity = new StringEntity(jsonObject.toString() , "UTF-8");
             entity.setContentType("application/json");
             post.setEntity(entity);

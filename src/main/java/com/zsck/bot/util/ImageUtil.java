@@ -10,6 +10,7 @@ import love.forte.simbot.bot.Bot;
 import love.forte.simbot.bot.BotManager;
 import love.forte.simbot.component.mirai.message.MiraiMessageContentBuilder;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -28,6 +29,12 @@ public class ImageUtil {
     private static Bot bot;
     private static Random random = new Random(Instant.now().getNano());
     private static MessageContentBuilderFactory messageContentBuilderFactory;
+    private static String filePath;
+
+    @Value("${com.zsck.data.file-path}")
+    public void setFilePath(String filePath) {
+        ImageUtil.filePath = filePath;
+    }
 
     public ImageUtil(@NotNull BotManager botManager , MessageContentBuilderFactory factory) {
         bot = botManager.getDefaultBot();
@@ -48,7 +55,7 @@ public class ImageUtil {
     }
 
     public static MiraiMessageContentBuilder getImages(MiraiMessageContentBuilder builder , Integer num , FileName fileName){
-        File file = new File(DataUtil.filePath + fileName);
+        File file = new File(filePath + fileName);
         File[] files = file.listFiles();
         Set<Integer> des = new HashSet<>();
         while (des.size() < num){
@@ -74,4 +81,5 @@ public class ImageUtil {
         }
         return n;
     }
+
 }
