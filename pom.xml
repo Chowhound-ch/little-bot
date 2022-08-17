@@ -10,9 +10,9 @@
     </parent>
     <groupId>com.zsck.bot</groupId>
     <artifactId>bot-core</artifactId>
-    <version>0.0.1</version>
-    <name>demo</name>
-    <description>demo</description>
+    <version>0.0.4</version>
+    <name>little-bot</name>
+    <description>little-bot</description>
     <properties>
         <java.version>8</java.version>
         <simbot.version>2.3.4</simbot.version>

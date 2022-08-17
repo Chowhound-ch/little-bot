@@ -72,7 +72,7 @@ public class ImageUtil {
     }
     public static Integer getNum(String text){
 
-        String num = ReUtil.get("(\\d*)", text, 0);
+        String num = ReUtil.get("(\\d+)", text, 0);
         Integer n;
         if (StrUtil.isBlankOrUndefined(num)){
             n = 1;
