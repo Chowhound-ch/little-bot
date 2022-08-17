@@ -39,7 +39,7 @@ public class ScheduleServiceImpl extends ServiceImpl<ScheduleMapper , Schedule>
     @Override
     public List<Schedule> getScheduleByWeekIndex(Integer index) {
         LambdaQueryWrapper<Schedule> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Schedule::getWeekIndex , index);
+        wrapper.eq(Schedule::getWeekIndex , index).orderByAsc(Schedule::getDate).orderByAsc(Schedule::getStartTime);
         return list(wrapper);
     }
 
