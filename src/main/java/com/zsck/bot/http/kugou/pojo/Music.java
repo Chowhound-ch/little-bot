@@ -18,6 +18,7 @@ public class Music {
     private Integer id;
     private String audioName;
     private String songName;
+    @JsonProperty("img")
     private String imgUrl;
     @JsonProperty("author_name")
     private String author;

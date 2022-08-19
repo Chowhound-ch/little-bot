@@ -6,8 +6,7 @@ import com.zsck.bot.annotation.BotPermits;
 import com.zsck.bot.common.pojo.PermitDetail;
 import com.zsck.bot.common.service.PermitDetailService;
 
-import com.zsck.bot.enums.MsgType;
-import com.zsck.bot.util.MsgSenderHelper;
+import com.zsck.bot.common.helper.MsgSenderHelper;
 import love.forte.simbot.api.message.events.MsgGet;
 import love.forte.simbot.bot.Bot;
 import love.forte.simbot.bot.BotManager;
@@ -16,7 +15,6 @@ import love.forte.simbot.listener.ListenerInterceptContext;
 import love.forte.simbot.listener.ListenerInterceptor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;

@@ -8,6 +8,7 @@ import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.xml.internal.bind.v2.TODO;
 import com.zsck.bot.http.kugou.pojo.Music;
 import com.zsck.bot.http.kugou.service.MusicService;
 import lombok.extern.slf4j.Slf4j;
@@ -17,15 +18,11 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.intellij.lang.annotations.JdkConstants;
-import org.jaudiotagger.audio.AudioFileIO;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -87,11 +84,9 @@ public class KuGouMusic {
             musicDetail.setTime(musicDetail.getIsFreePart() == 1 ? 60 : musicDetail.getTime() / 1000);//单位化为 秒(爬取到的音乐时间单位为毫秒)
             List<String> fileList = keepMusicToDB(musicDetail, bytes);
             return readyForSender(fileList, musicDetail);
-        } catch (IOException e) {
+        } catch (IOException | JSONException e) {
             e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }finally {
+        } finally {
             IoUtil.close(mp3File);
         }
         return null;
@@ -113,7 +108,7 @@ public class KuGouMusic {
             if (!StrUtil.isBlankOrUndefined(music.getImgUrl())) {
                 list.add("url:" + music.getImgUrl());
             }
-            if (isPartFree == 1){
+            if (isPartFree != null && isPartFree == 1){
                 list.add("tip: 歌曲为付费歌曲，仅可试听1分钟.欲听完整版请前往酷狗音乐app开通VIP");
             }
         }
@@ -123,7 +118,7 @@ public class KuGouMusic {
         isExist(audioName);
         ByteBuffer wrap = ByteBuffer.wrap(bytes);
         List<String> fileList = new ArrayList<>();
-        Integer perFileSize = bytes.length / (time/61 + 1);
+        int perFileSize = bytes.length / (time/61 + 1);
         for (int i = 0; true ; i++) {
             if (i * perFileSize >bytes.length -perFileSize * 0.05){//若最后多出perFileSize * 0.05则忽略不计(实测最后若多出小部分会导致最后部分无法播放)
                 break;

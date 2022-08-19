@@ -12,8 +12,8 @@ public enum FileName {
     SKY("sky/"),
     SE("se/"),
     PC("pc/"),
-    YIN("yin"),
-    PAPER("paper");
+    YIN("yin/"),
+    PAPER("paper/");
     private final String value;
 
     FileName(String value) {

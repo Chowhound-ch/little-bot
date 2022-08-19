@@ -1,5 +1,8 @@
 com:
   zsck:
+    cache:
+      enable-redis-cache-img: false #是否使用Redis缓存缓存图片
+      max-cached-image: 5 #缓存图片的数量
     data:
       user-name: ${USERNAME_ACADEMIC}
       pwd: ${PWD_ACADEMIC}
@@ -45,6 +48,10 @@ spring:
     property-naming-strategy: SNAKE_CASE
     deserialization:
       FAIL_ON_UNKNOWN_PROPERTIES: false
+  redis:
+    host: ${REDIS_HOST}
+    password: ${REDIS_PASSWORD}
+
 mybatis-plus:
   global-config:
     db-config:

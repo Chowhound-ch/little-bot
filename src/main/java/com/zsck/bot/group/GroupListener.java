@@ -2,22 +2,17 @@ package com.zsck.bot.group;
 
 import catcode.CatCodeUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.CharUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
-import com.alibaba.druid.sql.visitor.functions.Char;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.zsck.bot.annotation.BotPermits;
 import com.zsck.bot.common.pojo.PermitDetail;
 import com.zsck.bot.common.service.PermitDetailService;
-import com.zsck.bot.enums.MsgType;
 import com.zsck.bot.enums.Permit;
 import com.zsck.bot.http.kugou.KuGouMusic;
 import com.zsck.bot.http.kugou.pojo.Music;
 import com.zsck.bot.http.kugou.service.MusicService;
 import com.zsck.bot.util.ContextUtil;
-import com.zsck.bot.util.MsgSenderHelper;
-import lombok.AllArgsConstructor;
+import com.zsck.bot.common.helper.MsgSenderHelper;
 import lombok.extern.slf4j.Slf4j;
 import love.forte.simbot.annotation.*;
 import love.forte.simbot.api.message.events.GroupMsg;
@@ -25,9 +20,7 @@ import love.forte.simbot.api.message.events.MessageGet;
 import love.forte.simbot.api.message.results.FileResult;
 import love.forte.simbot.api.sender.AdditionalApi;
 import love.forte.simbot.api.sender.MsgSender;
-import love.forte.simbot.api.sender.Sender;
 import love.forte.simbot.component.mirai.additional.MiraiAdditionalApis;
-import love.forte.simbot.component.mirai.message.MiraiGroupMsgFlag;
 import love.forte.simbot.component.mirai.message.MiraiMessageContentBuilder;
 import love.forte.simbot.component.mirai.message.MiraiMessageContentBuilderFactory;
 import love.forte.simbot.filter.MatchType;
@@ -38,7 +31,6 @@ import org.jaudiotagger.audio.AudioFileIO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
@@ -68,9 +60,10 @@ public class GroupListener {
     @PostConstruct
     private void init(){
         path = KuGouMusic.path;
-        factory = ContextUtil.getMiraiFactory();
+        factory = ContextUtil.getForwardBuilderFactory();
         codeUtil = CatCodeUtil.getInstance();
     }
+
 
     @Filter(value = "^/点歌\\s*{{music}}" , matchType = MatchType.REGEX_MATCHES)
     @OnGroup

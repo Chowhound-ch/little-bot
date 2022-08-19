@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import javax.annotation.PostConstruct;
 
@@ -23,6 +24,8 @@ public class CheckHostPermit {
     private String hostNumber;
     @Autowired
     private PermitDetailService permitDetailService;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @PostConstruct
     private void init(){

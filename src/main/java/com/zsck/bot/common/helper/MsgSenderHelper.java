@@ -1,15 +1,11 @@
-package com.zsck.bot.util;
+package com.zsck.bot.common.helper;
 
 import com.zsck.bot.enums.MsgType;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import love.forte.simbot.api.message.MessageContent;
 import love.forte.simbot.api.message.events.GroupMsg;
-import love.forte.simbot.api.message.events.MessageGet;
 import love.forte.simbot.api.message.events.MsgGet;
 import love.forte.simbot.api.sender.MsgSender;
-import love.forte.simbot.component.mirai.message.MiraiGroupMsgFlag;
-
-import javax.xml.ws.soap.Addressing;
 
 /**
  * @author QQ:825352674
@@ -21,6 +17,13 @@ public class MsgSenderHelper{
     private String number;
     private MsgSender sender;
     public void senderMsg(String msg){
+        if (msgType == MsgType.GROUP){
+            sender.SENDER.sendGroupMsg(number, msg);
+        }else if (msgType == MsgType.PRIVATE){
+            sender.SENDER.sendPrivateMsg(number, msg);
+        }
+    }
+    public void senderMsg(MessageContent msg){
         if (msgType == MsgType.GROUP){
             sender.SENDER.sendGroupMsg(number, msg);
         }else if (msgType == MsgType.PRIVATE){
