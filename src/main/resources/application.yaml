@@ -6,7 +6,7 @@ com:
     data:
       user-name: ${USERNAME_ACADEMIC}
       pwd: ${PWD_ACADEMIC}
-      host: ${HOST} #bot管理者qq
+      user-qq: ${HOST} #bot管理者qq
       file-path: ${FILE_PATH} #图片存储位置
 simbot:
   core:

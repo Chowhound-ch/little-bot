@@ -20,7 +20,7 @@ import javax.annotation.PostConstruct;
 @Slf4j
 @Configuration
 public class CheckHostPermit {
-    @Value("${com.zsck.data.host}")
+    @Value("${com.zsck.data.user-qq}")
     private String hostNumber;
     @Autowired
     private PermitDetailService permitDetailService;

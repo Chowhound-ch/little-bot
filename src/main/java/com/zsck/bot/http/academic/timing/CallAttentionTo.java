@@ -4,7 +4,6 @@ import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import com.zsck.bot.http.academic.pojo.Schedule;
 import com.zsck.bot.http.academic.service.ScheduleService;
-import com.zsck.bot.util.DataUtil;
 import com.zsck.bot.util.Resolver;
 import love.forte.simbot.bot.Bot;
 import love.forte.simbot.bot.BotManager;

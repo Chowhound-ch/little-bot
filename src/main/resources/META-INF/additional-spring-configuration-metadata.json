@@ -1,8 +1,35 @@
 {
   "properties": [
     {
-      "name": "com.zsck.enable-redis-cache-img",
+      "name": "com.zsck.cache.max-cached-image",
+      "defaultValue": 5,
+      "type": "java.lang.Integer",
+      "description": "Description for com.zsck.cache.max-cached-image."
+    },
+    {
+      "name": "com.zsck.cache.enable-redis-cache-img",
+      "defaultValue": false,
       "type": "java.lang.Boolean",
-      "description": "Description for com.zsck.enable-redis-cache-img."
-  }
-] }
+      "description": "Description for com.zsck.cache.enable-redis-cache-img."
+    },
+    {
+      "name": "com.zsck.data.user-name",
+      "type": "java.lang.String",
+      "description": "Description for com.zsck.data.user-name."
+    },
+    {
+      "name": "com.zsck.data.pwd",
+      "type": "java.lang.String",
+      "description": "Description for com.zsck.data.pwd."
+    },
+    {
+      "name": "com.zsck.data.file-path",
+      "type": "java.lang.String",
+      "description": "Description for com.zsck.data.file-path."
+    },
+    {
+      "name": "com.zsck.data.user-qq",
+      "type": "java.lang.String",
+      "description": "Description for com.zsck.data.user-qq."
+    }
+  ] }

@@ -5,7 +5,7 @@ import com.zsck.bot.http.academic.pojo.ClassMap;
 import com.zsck.bot.http.academic.pojo.Schedule;
 import com.zsck.bot.http.academic.service.ClassNameService;
 import com.zsck.bot.http.academic.service.ScheduleService;
-import com.zsck.bot.util.DataUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -15,29 +15,28 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.configurationprocessor.json.JSONArray;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.net.URI;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author QQ:825352674
  * @date 2022/7/23 - 9:59
  */
+@Slf4j
 @Component
 public class Academic {
     public String USERAGENT = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36 SLBrowser/8.0.0.3161 SLBChan/103";
     public String REFERER = "http://jxglstu.hfut.edu.cn/eams5-student/login?refer=http://jxglstu.hfut.edu.cn/eams5-student/for-std/course-table/info/152113";
 
-    private Logger logger = LoggerFactory.getLogger(Academic.class);
     private List<Schedule> scheduleListRes;
     private List<ClassMap> className;
 
@@ -122,12 +121,12 @@ public class Academic {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                logger.error("数据解析错误");
+                log.error("数据解析错误");
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            logger.error("访问网址错误");
+            log.error("访问网址错误");
         } finally {
             IoUtil.close(prepareForKey);
             IoUtil.close(prepareLessonIds);
@@ -136,7 +135,7 @@ public class Academic {
         keepData();
     }
     public void keepData(){
-        logger.info("表schedule新增数据:" +  scheduleService.saveBatch(scheduleListRes) + "条");
-        logger.info("表class_map新增数据:" + classNameService.saveBatch(className) + "条");
+        log.info("表schedule新增数据:" +  scheduleService.saveBatch(scheduleListRes) + "条");
+        log.info("表class_map新增数据:" + classNameService.saveBatch(className) + "条");
     }
 }

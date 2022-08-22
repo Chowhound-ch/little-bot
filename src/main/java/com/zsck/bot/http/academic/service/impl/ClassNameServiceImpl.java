@@ -1,10 +1,9 @@
 package com.zsck.bot.http.academic.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zsck.bot.mybatis.mapper.ClassMapMapper;
 import com.zsck.bot.http.academic.pojo.ClassMap;
 import com.zsck.bot.http.academic.service.ClassNameService;
-import org.springframework.cache.annotation.CacheConfig;
+import com.zsck.bot.mybatis.mapper.ClassMapMapper;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;

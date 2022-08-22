@@ -20,8 +20,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +32,6 @@ import java.util.List;
 @ConditionalOnProperty(prefix = "com.zsck.cache", value = "enable-redis-cache-img", havingValue = "true")
 @Component
 public class RedisImgProxy implements CommandLineRunner {
-    private String fileNameType;
     private String integerNameType;
     @Value("${com.zsck.cache.max-cached-image}")
     private Integer maxCached;
@@ -43,7 +40,6 @@ public class RedisImgProxy implements CommandLineRunner {
 
 
     public void init(){
-        fileNameType = FileName.class.getTypeName();
         integerNameType = Integer.class.getTypeName();
         List<byte[]> img = ImageHelper.getRandomImg(maxCached);
         log.info("使用redis进行缓存,数量:{}", maxCached );

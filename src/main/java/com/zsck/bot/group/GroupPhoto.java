@@ -1,9 +1,8 @@
 package com.zsck.bot.group;
 
 
-import com.zsck.bot.enums.FileName;
-import com.zsck.bot.util.ContextUtil;
 import com.zsck.bot.common.helper.ImageHelper;
+import com.zsck.bot.util.ContextUtil;
 import love.forte.simbot.annotation.Filter;
 import love.forte.simbot.annotation.ListenGroup;
 import love.forte.simbot.annotation.OnGroup;
