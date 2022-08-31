@@ -16,6 +16,13 @@ public class MsgSenderHelper{
     private MsgType msgType;
     private String number;
     private MsgSender sender;
+
+
+    private MsgSenderHelper(MsgType msgType, MsgSender sender) {
+        this.msgType = msgType;
+        this.sender = sender;
+    }
+
     public void senderMsg(String msg){
         if (msgType == MsgType.GROUP){
             sender.SENDER.sendGroupMsg(number, msg);
@@ -30,14 +37,16 @@ public class MsgSenderHelper{
             sender.SENDER.sendPrivateMsg(number, msg);
         }
     }
+    public void senderPriMsg(String msg){
+        sender.SENDER.sendPrivateMsg(number, msg);
+    }
+
+    public void senderPriMsg(MessageContent msg){
+        sender.SENDER.sendPrivateMsg(number, msg);
+    }
 
     public String getNumber() {
         return number;
-    }
-
-    private MsgSenderHelper(MsgType msgType, MsgSender sender) {
-        this.msgType = msgType;
-        this.sender = sender;
     }
 
     private void setNumber(String number) {
@@ -53,6 +62,9 @@ public class MsgSenderHelper{
             msgSenderHelper.setNumber(msgGet.getAccountInfo().getAccountCode());
         }
         return msgSenderHelper;
+    }
+    public static MsgSenderHelper getInstance(String qqNumber, MsgSender sender, MsgType msgType){
+        return new MsgSenderHelper(msgType, qqNumber, sender);
     }
 
     private static MsgType getSenderType(MsgGet msgGet){

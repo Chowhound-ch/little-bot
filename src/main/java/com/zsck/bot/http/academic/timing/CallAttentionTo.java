@@ -2,6 +2,8 @@ package com.zsck.bot.http.academic.timing;
 
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
+import com.zsck.bot.common.helper.MsgSenderHelper;
+import com.zsck.bot.enums.MsgType;
 import com.zsck.bot.http.academic.pojo.Schedule;
 import com.zsck.bot.http.academic.service.ScheduleService;
 import com.zsck.bot.util.Resolver;
@@ -35,26 +37,29 @@ import java.util.concurrent.TimeUnit;
 public class CallAttentionTo {
     @Autowired
     private BotManager botManager;
+    private Bot bot;
     private final Logger logger = LoggerFactory.getLogger(CallAttentionTo.class);
     @Autowired
     private ScheduleService scheduleService;
     private ScheduledExecutorService scheduledExecutorService;
-    @Value("${com.zsck.data.host}")
+    private MsgSenderHelper senderHelper;
+    @Value("${com.zsck.data.user-qq}")
     private String host;
     @PostConstruct
     private void init(){
+        bot = botManager.getDefaultBot();
         scheduledExecutorService = Executors.newScheduledThreadPool(5);
+        senderHelper = MsgSenderHelper.getInstance(host, bot.getSender(), MsgType.PRIVATE);
     }
 
     //0 40 7 * * 1-5
     @Scheduled(cron = "0 40 7 * * 1-5")
     @Async
     public void morning(){
-        Bot bot = botManager.getDefaultBot();
         Date firstDate = scheduleService.getFirstDate();
         Date date = Date.valueOf(DateUtil.today());
         if (date.before(firstDate)) {
-            bot.getSender().SENDER.sendPrivateMsg(host, "当前正处于假期，距离开学还有" +DateUtil.between(date , firstDate , DateUnit.DAY , true) + "天" );
+            senderHelper.senderPriMsg("当前正处于假期，距离开学还有" +DateUtil.between(date , firstDate , DateUnit.DAY , true) + "天" );
         }else {
             long gap = DateUtil.between(firstDate, date, DateUnit.DAY, true);
             List<Schedule> scheduleList = scheduleService.getScheduleByDate(date);
@@ -70,13 +75,23 @@ public class CallAttentionTo {
                     return;
                 }
             }
-            bot.getSender().SENDER.sendPrivateMsg(host , "今日为:" + date +",本周为第:" + (gap/7 + 1) + "周");
+            senderHelper.senderPriMsg("今日为:" + date +", 第:" + (gap/7 + 1) + "周");
             Resolver.sendCourseDetail(host , bot.getSender() , scheduleList);
         }
     }
     @Scheduled(cron = "0 0 22 * * 1,2,3,4,7")
     @Async
     public void even(){
-        morning();
+        Date firstDate = scheduleService.getFirstDate();
+        Date date = Date.valueOf(DateUtil.formatDate(DateUtil.tomorrow()));
+        if ( !date.before(firstDate)) {
+            long gap = DateUtil.between(firstDate, date, DateUnit.DAY, true);
+            List<Schedule> scheduleList = scheduleService.getScheduleByDate(date);
+            if (scheduleList.isEmpty()){
+                return;
+            }
+            senderHelper.senderPriMsg("明日为:" + date +", 第:" + (gap/7 + 1) + "周");
+            Resolver.sendCourseDetail(host , bot.getSender() , scheduleList);
+        }
     }
 }

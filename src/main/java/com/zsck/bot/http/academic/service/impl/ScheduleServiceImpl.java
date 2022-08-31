@@ -3,10 +3,9 @@ package com.zsck.bot.http.academic.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zsck.bot.mybatis.mapper.ScheduleMapper;
 import com.zsck.bot.http.academic.pojo.Schedule;
 import com.zsck.bot.http.academic.service.ScheduleService;
-import org.springframework.cache.annotation.Cacheable;
+import com.zsck.bot.mybatis.mapper.ScheduleMapper;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
@@ -46,7 +45,7 @@ public class ScheduleServiceImpl extends ServiceImpl<ScheduleMapper , Schedule>
     @Override
     public List<Schedule> getScheduleByDate(Date date) {
         LambdaQueryWrapper<Schedule> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Schedule::getDate , date);
+        wrapper.eq(Schedule::getDate , date).orderByAsc( Schedule::getStartTime);
         return list(wrapper);
     }
 

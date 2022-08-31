@@ -18,17 +18,5 @@ public interface ScheduleService extends IService<Schedule> {
     List<Schedule> getScheduleByWeekIndex(Integer index);
 
     List<Schedule> getScheduleByDate(Date date);
-//    Date getEndDate();
-//
-//    Date getFirstDate();
-//
-//    List<Schedule> getScheduleByDate(Date date);
-//
-//    Integer keepDate(List<Schedule> list);
-//
-//    List<Schedule> getAllSchedule();
-//
-//    List<Schedule> getScheduleByWeekIndex(Integer weekIndex);
-//
-//    Integer deleteAll();
+
 }
