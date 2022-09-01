@@ -49,4 +49,27 @@ public class ScheduleServiceImpl extends ServiceImpl<ScheduleMapper , Schedule>
         return list(wrapper);
     }
 
+    @Override
+    public Boolean hasClass(Integer index) {
+        List<Schedule> schedules = getScheduleByWeekIndex(index);
+        if (schedules == null || schedules.isEmpty()){
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public Boolean hasClass(Date date) {
+        List<Schedule> schedules = getScheduleByDate(date);
+        if (schedules == null || schedules.isEmpty()){
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public Map<String, Object> getClassDetail(Integer lessonId) {
+        return baseMapper.getClassDetail(lessonId);
+    }
+
 }

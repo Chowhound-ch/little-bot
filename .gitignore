@@ -4,7 +4,7 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-
+/mihoyou/
 ### STS ###
 .apt_generated
 .classpath

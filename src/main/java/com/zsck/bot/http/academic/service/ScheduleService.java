@@ -5,6 +5,7 @@ import com.zsck.bot.http.academic.pojo.Schedule;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author QQ:825352674
@@ -18,5 +19,11 @@ public interface ScheduleService extends IService<Schedule> {
     List<Schedule> getScheduleByWeekIndex(Integer index);
 
     List<Schedule> getScheduleByDate(Date date);
+
+    Boolean hasClass(Integer index);
+
+    Boolean hasClass(Date date);
+
+    Map<String , Object> getClassDetail(Integer lessonId);
 
 }

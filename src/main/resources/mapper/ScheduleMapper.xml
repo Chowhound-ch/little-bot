@@ -3,4 +3,8 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zsck.bot.mybatis.mapper.ScheduleMapper">
+    <!--    Map<String , Object> getClassDetail(@Param("lessonId") Integer lessonId);-->
+    <select id="getClassDetail" resultType="map">
+        select MAX(week_index) as end ,MIN(week_index) as start ,person_name from schedule where lesson_id = #{lessonId} group by person_name
+    </select>
 </mapper>

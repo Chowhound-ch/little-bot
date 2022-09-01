@@ -42,7 +42,7 @@ public class Resolver {
                 String course = classNameService.getClassName(detail.getLessonId());
                 String start = String.format( "%02d",detail.getStartTime()/100) + ":" + String.format( "%02d",detail.getStartTime()%100);
                 String end = String.format( "%02d",detail.getEndTime()/100 )+ ":" + String.format("%02d",detail.getEndTime()%100);
-                builder.text("\n" + start + " - " + end + room + " " + course + " " + detail.getPersonName());
+                builder.text("\n *" + start + " - " + end + room + " " + course + " " + detail.getPersonName());
             }
         }
         sender.SENDER.sendPrivateMsg(qqNumber, builder.build());

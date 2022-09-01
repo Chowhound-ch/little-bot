@@ -11,7 +11,6 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 public class SimbotApplication {
 
     public static void main(String[] args) {
-        //Security.addProvider( new BouncyCastleProvider());
         SpringApplication.run(SimbotApplication.class, args);
     }
 
