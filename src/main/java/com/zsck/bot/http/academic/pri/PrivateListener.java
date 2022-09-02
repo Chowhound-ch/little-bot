@@ -113,7 +113,7 @@ public class PrivateListener {
             Resolver.sendCourseDetail(privateMsg.getAccountInfo().getAccountCode() , sender , scheduleList);
         }
     }
-    @Filter(value = "(f|F)\\s+{{name}}" , matchType = MatchType.REGEX_MATCHES)
+    @Filter(value = "(f|F)\\s*{{name}}" , matchType = MatchType.REGEX_MATCHES)
     @OnPrivate
     public void find(PrivateMsg privateMsg  ,MsgSender sender,
                      @FilterValue("name") String name){

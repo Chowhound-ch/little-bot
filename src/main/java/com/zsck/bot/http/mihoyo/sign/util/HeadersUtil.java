@@ -38,7 +38,7 @@ public class HeadersUtil {
     }
     public static Header[] getBasicHeaders(String cookie) {
         return new HeadersUtil.Builder().add("Cookie", cookie)
-                .add("User-Agent", String.format("Mozilla/5.0 (iPhone; CPU iPhone OS 14_0_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) miHoYoBBS/%s", "2.35.2"))
+                .add("User-Agent", String.format("Mozilla/5.0 (iPhone; CPU iPhone OS 14_0_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) miHoYoBBS/%s", SignConstant.APP_VERSION))
                 .add("Referer", SignConstant.REFERER_URL)
                 .add("Accept-Encoding", "gzip, deflate, br")
                 .add("x-rpc-channel", "appstore")

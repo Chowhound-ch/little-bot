@@ -157,7 +157,7 @@ public class GroupListener {
         runnable.run();
     }
     @BotPermits(Permit.HOST)
-    @Filter(value = "^/设置权限\\s+{{position,(1|2)}}", matchType = MatchType.REGEX_MATCHES, anyAt = true)
+    @Filter(value = "^/设置权限\\s*{{position,(1|2)}}", matchType = MatchType.REGEX_MATCHES, anyAt = true)
     @OnGroup
     public void setPosition(GroupMsg groupMsg, MsgSender sender,
                             @FilterValue("position")Integer position) {
