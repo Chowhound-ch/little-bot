@@ -1,6 +1,8 @@
 package com.zsck.bot.http.mihoyo.sign.pojo;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.zsck.bot.http.mihoyo.sign.enums.ServerType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,4 +23,12 @@ public class GenshinInfo {
     private String cookie;
     private Integer push;
     private Integer deletes;
+
+    @TableField(exist = false)
+    private ServerType serverType;
+
+    public void setUid(String uid) {
+        serverType = uid.charAt(0) < '5' ? ServerType.OFFICIAL : ServerType.FOREIGN;
+        this.uid = uid;
+    }
 }

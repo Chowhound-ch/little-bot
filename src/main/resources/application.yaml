@@ -8,6 +8,8 @@ com:
       pwd: ${PWD_ACADEMIC}
       user-qq: ${HOST} #bot管理者qq
       file-path: ${FILE_PATH} #图片存储位置
+    config:
+      group-state-check: true
 simbot:
   core:
     bot-resource-type: both

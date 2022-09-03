@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zsck.bot.http.academic.pojo.Schedule;
 import com.zsck.bot.http.academic.service.ScheduleService;
-import com.zsck.bot.mybatis.mapper.ScheduleMapper;
+import com.zsck.bot.http.academic.mapper.ScheduleMapper;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;

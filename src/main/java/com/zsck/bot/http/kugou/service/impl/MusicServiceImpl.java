@@ -3,7 +3,7 @@ package com.zsck.bot.http.kugou.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zsck.bot.http.kugou.pojo.Music;
 import com.zsck.bot.http.kugou.service.MusicService;
-import com.zsck.bot.mybatis.mapper.MusicMapper;
+import com.zsck.bot.http.kugou.mapper.MusicMapper;
 import org.springframework.stereotype.Service;
 
 /**

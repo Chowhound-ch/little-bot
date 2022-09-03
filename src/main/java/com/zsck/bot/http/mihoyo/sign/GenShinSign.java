@@ -14,8 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -52,15 +52,19 @@ public class GenShinSign {
         return doSign(genshinInfo);
     }
     public String doSign(GenshinInfo info) {
+        StringBuffer buffer = new StringBuffer();
         try {
-            GenShinUtil.checkCookie(info.getCookie());
-            Map<String, Object> data = GenShinUtil.getSignDataMap(info.getUid());
+            GenShinUtil.checkCookie(info.getCookie());//检查cookie
+
+            Map<String, Object> data = GenShinUtil.getSignDataMap(info);
             JSONObject signResult = HttpUtil.doPostJson(SignConstant.SIGN_URL, HeadersUtil.getHeaders(info.getCookie()), data);
 
             log.info("签到uid:{} 结果:{}", info.getUid(), signResult);
-            return GenShinUtil.checkRet(signResult.getInteger("ret"));
+            buffer.append("uid:").append(info.getUid()).append("\n昵称:").append(info.getNickName()).append("\n签到结果:")
+                    .append(GenShinUtil.analyzeRet(signResult.getInteger("ret") == null? signResult.getInteger("retcode") : signResult.getInteger("ret")));
+            return buffer.toString();
         }catch (GenShinCookieException e){
-            return "cookie无效";
+            return e.getMessage();
         }
     }
 
@@ -68,23 +72,27 @@ public class GenShinSign {
      * 奖励列表
      *
      */
+    public void signList(String uid) {
+        LambdaQueryWrapper<GenshinInfo> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(GenshinInfo::getUid, uid);
+        GenshinInfo genshinInfo = genshinService.getOne(wrapper);
+        signList(genshinInfo);
+    }
     public void signList(GenshinInfo info) {
 
-        Map<String, Object> data = new HashMap<>(3);
-        data.put("act_id", SignConstant.ACT_ID);
-        data.put("region", SignConstant.REGION);
-        data.put("uid", info.getUid());
+        Map<String, Object> data = GenShinUtil.getSignDataMap(info);
 
-        JSONObject signInfoResult = HttpUtil.doGetJson(SignConstant.INFO_URL, HeadersUtil.getHeaders(""), data);//TODO cookie
+        JSONObject signInfoResult = HttpUtil.doGetJson(SignConstant.INFO_URL, HeadersUtil.getHeaders(info.getCookie()), data);
 
         JSONObject listInfoResult = HttpUtil.doGetJson(SignConstant.LIST_URL, HeadersUtil.getHeaders(info.getCookie()), data);
 
-        int totalSignDay = signInfoResult.getJSONObject("data").getInteger("total_sign_day") - 1;
-
+        Optional<JSONObject> jsonData = Optional.ofNullable(listInfoResult);
         JSONObject data2 = listInfoResult.getJSONObject("data");
+        int totalSignDay = data2.getInteger("total_sign_day") - 1;
+
+
         String awards = data2.getString("awards");
-        JSONArray jsonArray = new JSONArray();
-       // jsonArray = new JSONArray(awards);//TODO
+        JSONArray jsonArray = JSONArray.parseArray(awards);
 
         String itemName = jsonArray.getJSONObject(totalSignDay).getString("name");
         int itemCnt = jsonArray.getJSONObject(totalSignDay).getInteger("cnt");
@@ -95,9 +103,8 @@ public class GenShinSign {
 
         String img = jsonArray.getJSONObject(totalSignDay).getString("icon");
 
-//        setItemMsg("今天获取的奖励是:" + itemName + "X" + itemCnt);
-//        setItemImg(img);
-        //return isSign;
+        log.info("今天获取的奖励是:" + itemName + "X" + itemCnt);
+        log.info(img);
     }
 
 }

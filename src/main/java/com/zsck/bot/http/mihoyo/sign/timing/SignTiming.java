@@ -1,6 +1,6 @@
 package com.zsck.bot.http.mihoyo.sign.timing;
 
-import com.zsck.bot.common.helper.MsgSenderHelper;
+import com.zsck.bot.helper.MsgSenderHelper;
 import com.zsck.bot.enums.MsgType;
 import com.zsck.bot.http.mihoyo.sign.GenShinSign;
 import com.zsck.bot.http.mihoyo.sign.pojo.GenshinInfo;
@@ -12,7 +12,8 @@ import love.forte.simbot.component.mirai.message.MiraiMessageContentBuilder;
 import love.forte.simbot.component.mirai.message.MiraiMessageContentBuilderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -24,8 +25,9 @@ import java.util.List;
  * @author QQ:825352674
  * @date 2022/9/1 - 21:46
  */
-@Lazy
+@DependsOn("contextUtil")
 @EnableScheduling
+@EnableAsync
 @Component
 public class SignTiming {
     @Autowired
@@ -45,16 +47,22 @@ public class SignTiming {
         factory = ContextUtil.getForwardBuilderFactory();
     }
 
-    @Scheduled(cron = "0 0 10 * * * ?")
+    @Scheduled(cron = "00 00 10 * * ?")
+    //@Async
     public void sign(){
         MsgSenderHelper senderHelper = MsgSenderHelper.getInstance(host, bot.getSender(), MsgType.PRIVATE);
         List<GenshinInfo> list = genshinService.list();
+
         MiraiMessageContentBuilder builder = factory.getMessageContentBuilder();
         builder.forwardMessage(fun ->{
             for (GenshinInfo info : list){
                 fun.add(bot.getBotInfo(), genShinSign.doSign(info));
             }
         });
-        senderHelper.senderPriMsg(builder.build());
+        bot.getSender().SENDER.sendGroupMsg( 811545265, builder.build());
+        bot.getSender().SENDER.sendPrivateMsg( host, builder.build());
+
+
+        //senderHelper.priMsg(builder.build());
     }
 }

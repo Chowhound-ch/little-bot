@@ -2,11 +2,11 @@ package com.zsck.bot.http.academic.timing;
 
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
-import com.zsck.bot.common.helper.MsgSenderHelper;
+import com.zsck.bot.helper.MsgSenderHelper;
 import com.zsck.bot.enums.MsgType;
 import com.zsck.bot.http.academic.pojo.Schedule;
 import com.zsck.bot.http.academic.service.ScheduleService;
-import com.zsck.bot.util.Resolver;
+import com.zsck.bot.http.academic.util.ClassTableResolver;
 import love.forte.simbot.bot.Bot;
 import love.forte.simbot.bot.BotManager;
 import org.slf4j.Logger;
@@ -59,7 +59,7 @@ public class CallAttentionTo {
         Date firstDate = scheduleService.getFirstDate();
         Date date = Date.valueOf(DateUtil.today());
         if (date.before(firstDate)) {
-            senderHelper.senderPriMsg("当前正处于假期，距离开学还有" +DateUtil.between(date , firstDate , DateUnit.DAY , true) + "天" );
+            senderHelper.priMsg("当前正处于假期，距离开学还有" +DateUtil.between(date , firstDate , DateUnit.DAY , true) + "天" );
         }else {
             long gap = DateUtil.between(firstDate, date, DateUnit.DAY, true);
             List<Schedule> scheduleList = scheduleService.getScheduleByDate(date);
@@ -75,8 +75,8 @@ public class CallAttentionTo {
                     return;
                 }
             }
-            senderHelper.senderPriMsg("今日为:" + date +", 第:" + (gap/7 + 1) + "周");
-            Resolver.sendCourseDetail(host , bot.getSender() , scheduleList);
+            senderHelper.priMsg("今日为:" + date +", 第:" + (gap/7 + 1) + "周");
+            ClassTableResolver.sendCourseDetail(host , bot.getSender() , scheduleList);
         }
     }
     @Scheduled(cron = "0 0 22 * * 1,2,3,4,7")
@@ -90,8 +90,8 @@ public class CallAttentionTo {
             if (scheduleList.isEmpty()){
                 return;
             }
-            senderHelper.senderPriMsg("明日为:" + date +", 第:" + (gap/7 + 1) + "周");
-            Resolver.sendCourseDetail(host , bot.getSender() , scheduleList);
+            senderHelper.priMsg("明日为:" + date +", 第:" + (gap/7 + 1) + "周");
+            ClassTableResolver.sendCourseDetail(host , bot.getSender() , scheduleList);
         }
     }
 }

@@ -31,5 +31,11 @@
       "name": "com.zsck.data.user-qq",
       "type": "java.lang.String",
       "description": "Description for com.zsck.data.user-qq."
+    },
+    {
+      "name": "com.zsck.config.group-state-check",
+      "defaultValue": false,
+      "type": "java.lang.Boolean",
+      "description": "Description for com.zsck.config.group-state-check."
     }
   ] }
