@@ -36,6 +36,7 @@ public class StateMapHelper {
         if (groupStateMap.get(group) == null) {
             GroupState groupState = new GroupState(group, GroupStateEnum.CLOSED.getValue());
             groupStateService.save(groupState);
+            groupStateMap.put(group, GroupStateEnum.CLOSED);
             return GroupStateEnum.CLOSED;
         }
         return groupStateMap.get(group);
