@@ -1,6 +1,5 @@
 package com.zsck.bot.http.mihoyo.sign.util;
 
-import cn.hutool.core.io.IoUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.http.Header;
@@ -31,11 +30,7 @@ import java.util.Map;
 @Component
 public class HttpUtil {
 
-    private static CloseableHttpClient httpClient;
 
-    public HttpUtil() {
-        this.httpClient = HttpClients.createDefault();
-    }
 
     private static final RequestConfig REQUEST_CONFIG = RequestConfig.custom().setConnectTimeout(35000)
             .setConnectionRequestTimeout(35000)
@@ -59,7 +54,10 @@ public class HttpUtil {
             HttpGet httpGet = new HttpGet(uriBuilder.build());
             httpGet.setHeaders(headers);
             httpGet.setConfig(REQUEST_CONFIG);
-            try (CloseableHttpResponse execute = httpClient.execute(httpGet)){
+            try (
+                CloseableHttpClient httpClient = HttpClients.createDefault();
+                CloseableHttpResponse execute = httpClient.execute(httpGet)){
+
                 String res = EntityUtils.toString(execute.getEntity());
                 return JSONObject.parseObject(res);
             } catch (IOException e) {
@@ -74,18 +72,20 @@ public class HttpUtil {
     public static JSONObject doPostJson(String url, Header[] headers, Map<String, Object> data){
         HttpPost post = new HttpPost(url);
         post.setHeaders(headers);
-        CloseableHttpResponse execute = null;
 
         try {
             StringEntity entity = new StringEntity(JSON.toJSONString(data), StandardCharsets.UTF_8);
             post.setEntity(entity);
             post.setConfig(REQUEST_CONFIG);
-            execute = httpClient.execute(post);
-            return JSONObject.parseObject(EntityUtils.toString(execute.getEntity()));
+            try (
+                CloseableHttpClient httpClient = HttpClients.createDefault();
+                CloseableHttpResponse execute = httpClient.execute(post)) {
+
+                String jsonStr = EntityUtils.toString(execute.getEntity());
+                return JSONObject.parseObject(jsonStr);
+            }
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            IoUtil.close(execute);
         }
         return null;
     }

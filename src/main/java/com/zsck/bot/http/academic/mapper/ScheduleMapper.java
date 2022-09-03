@@ -13,5 +13,11 @@ import java.util.Map;
  */
 @Mapper
 public interface ScheduleMapper extends BaseMapper<Schedule> {
+    /**
+     * mybatisx插件的报错问题
+     * @param lessonId
+     * @return
+     */
+    @SuppressWarnings("all")
     Map<String , Object> getClassDetail(@Param("lessonId") Integer lessonId);
 }

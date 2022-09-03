@@ -60,9 +60,6 @@ public class SignTiming {
             }
         });
         bot.getSender().SENDER.sendGroupMsg( 811545265, builder.build());
-        bot.getSender().SENDER.sendPrivateMsg( host, builder.build());
-
-
         //senderHelper.priMsg(builder.build());
     }
 }

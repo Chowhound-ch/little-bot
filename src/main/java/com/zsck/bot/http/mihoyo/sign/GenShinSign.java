@@ -26,7 +26,7 @@ public class GenShinSign {
     /**
      * 获取cookie对应的Uid,获取对应信息
      */
-    public GenshinInfo checkUid(String cookie) {
+    public GenshinInfo analyzeCookie(String cookie) {
         GenshinInfo genshinInfo = new GenshinInfo();
         JSONObject result = HttpUtil.doGetJson(String.format("https://api-takumi.mihoyo.com/binding/api/getUserGameRolesByCookie?game_biz=%s", "hk4e_cn"), HeadersUtil.getBasicHeaders(cookie));
         String uid = (String) result.getJSONObject("data").getJSONArray("list").getJSONObject(0).get("game_uid");
@@ -70,7 +70,7 @@ public class GenShinSign {
 
     /**
      * 奖励列表
-     *
+     * TODO : 待处理
      */
     public void signList(String uid) {
         LambdaQueryWrapper<GenshinInfo> wrapper = new LambdaQueryWrapper<>();

@@ -31,8 +31,6 @@ public class StateMapHelper {
 
     /**
      * 获取群组状态
-     * @param group
-     * @return
      */
     public GroupStateEnum getState(String group){
 
@@ -41,9 +39,6 @@ public class StateMapHelper {
 
     /**
      * 返回值为false则des 和 used 群组状态相同
-     * @param group
-     * @param stateEnum
-     * @return
      */
     public Boolean setState(String group, GroupStateEnum stateEnum){
         if ( getState(group) == stateEnum ){
