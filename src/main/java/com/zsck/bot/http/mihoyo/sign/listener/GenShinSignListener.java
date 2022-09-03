@@ -45,7 +45,7 @@ public class GenShinSignListener {
     private final MiraiMessageContentBuilderFactory miraiFactory = ContextUtil.getForwardBuilderFactory();
     private final static String GENSHIN_SIGN = "GENSHIN_SIGN:COOKIE";
 
-    @Filter(value = "/ys签到", matchType = MatchType.EQUALS)
+    @Filter(value = "ys签到", matchType = MatchType.EQUALS)
     @OnGroup
     public void signReady(GroupMsg groupMsg, MsgSender sender){
         MsgSenderHelper senderHelper = MsgSenderHelper.getInstance(groupMsg, sender);
@@ -56,7 +56,7 @@ public class GenShinSignListener {
         wrapper.eq(GenshinInfo::getQqNumber, qqNumber);
         List<GenshinInfo> list = genshinService.list(wrapper);
         if (list.isEmpty()){
-            senderHelper.groupMsg("[CAT:at,code:" + qqNumber + "]你当前还没有绑定原神账号呢");
+            senderHelper.groupMsg("[CAT:at,code=" + qqNumber + "]你当前还没有绑定原神账号呢");
         } else {
             MiraiMessageContentBuilder forwardBuilder = miraiFactory.getMessageContentBuilder();
             forwardBuilder.forwardMessage( fun ->{
@@ -66,7 +66,7 @@ public class GenShinSignListener {
         }
     }
 
-    @Filter(value = "/绑定原神账号", matchType = MatchType.EQUALS)
+    @Filter(value = "绑定原神账号", matchType = MatchType.EQUALS)
     @OnGroup
     public void bindGenshin(GroupMsg groupMsg, MsgSender sender, ListenerContext context) {
         MsgSenderHelper senderHelper = MsgSenderHelper.getInstance(groupMsg, sender);

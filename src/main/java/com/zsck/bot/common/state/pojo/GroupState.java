@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
@@ -12,6 +13,7 @@ import java.io.Serializable;
  * 
  * @TableName group_state
  */
+@NoArgsConstructor
 @TableName(value ="group_state")
 @Data
 public class GroupState implements Serializable {
@@ -30,6 +32,11 @@ public class GroupState implements Serializable {
      * 
      */
     private Integer state;
+
+    public GroupState(String groupNumber, Integer state) {
+        this.groupNumber = groupNumber;
+        this.state = state;
+    }
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

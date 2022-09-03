@@ -33,8 +33,12 @@ public class StateMapHelper {
      * 获取群组状态
      */
     public GroupStateEnum getState(String group){
-
-        return groupStateMap.get(group) == null? GroupStateEnum.CLOSED : groupStateMap.get(group);
+        if (groupStateMap.get(group) == null) {
+            GroupState groupState = new GroupState(group, GroupStateEnum.CLOSED.getValue());
+            groupStateService.save(groupState);
+            return GroupStateEnum.CLOSED;
+        }
+        return groupStateMap.get(group);
     }
 
     /**
