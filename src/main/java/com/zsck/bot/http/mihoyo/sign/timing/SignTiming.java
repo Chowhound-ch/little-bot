@@ -59,7 +59,8 @@ public class SignTiming {
                 fun.add(bot.getBotInfo(), genShinSign.doSign(info));
             }
         });
-        bot.getSender().SENDER.sendGroupMsg( 811545265, builder.build());
+        //TODO
+        bot.getSender().SENDER.sendGroupMsg( 741359980, builder.build());
         //senderHelper.priMsg(builder.build());
     }
 }
