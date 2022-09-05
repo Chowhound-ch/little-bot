@@ -14,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -26,19 +28,27 @@ public class GenShinSign {
     /**
      * 获取cookie对应的Uid,获取对应信息
      */
-    public GenshinInfo analyzeCookie(String cookie) {
-        GenshinInfo genshinInfo = new GenshinInfo();
+    public List<GenshinInfo> analyzeCookie(String cookie) {
         JSONObject result = HttpUtil.doGetJson(String.format("https://api-takumi.mihoyo.com/binding/api/getUserGameRolesByCookie?game_biz=%s", "hk4e_cn"), HeadersUtil.getBasicHeaders(cookie));
-        String uid = (String) result.getJSONObject("data").getJSONArray("list").getJSONObject(0).get("game_uid");
-        String nickname = (String) result.getJSONObject("data").getJSONArray("list").getJSONObject(0).get("nickname");
+        JSONArray resArr = result.getJSONObject("data").getJSONArray("list");
 
-        log.info("cookie对应的uid：{}" , uid);
-        log.info("cookie对应的昵称：{}" , nickname);
-        genshinInfo.setCookie(cookie);
-        genshinInfo.setUid(uid);
-        genshinInfo.setNickName(nickname);
+        List<GenshinInfo> infoList = new ArrayList<>();
+        resArr.forEach( res ->{
+            JSONObject jsonObject = (JSONObject) res;
+            GenshinInfo info = new GenshinInfo();
 
-        return genshinInfo;
+            String uid = jsonObject.getString("game_uid");
+            String nickname = jsonObject.getString("nickname");
+            info.setCookie(cookie);
+            info.setUid(uid);
+            info.setNickName(nickname);
+
+            log.info("cookie对应的uid：{}" , uid);
+            log.info("cookie对应的昵称：{}" , nickname);
+            infoList.add(info);
+        });
+
+        return infoList;
     }
 
 
