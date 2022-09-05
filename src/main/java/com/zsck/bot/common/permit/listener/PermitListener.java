@@ -32,28 +32,29 @@ public class PermitListener {
 
 
     @BotPermits(Permit.HOST)
-    @Filter(value = "^/设置权限\\s*{{position,(1|2)}}", matchType = MatchType.REGEX_MATCHES, anyAt = true)
+    @Filter(value = "^/设置权限\\s*{{position,(1|2)}}", matchType = MatchType.REGEX_FIND, anyAt = true)
     @OnGroup
     public void setPosition(GroupMsg groupMsg, MsgSender sender,
                             @FilterValue("position")Integer position) {
         LambdaQueryWrapper<PermitDetail> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(PermitDetail::getQqNumber, codeUtil.getParam(groupMsg.getMsg(), "code")/*获取被at人qq*/);
+        String qqNumber = codeUtil.getParam(groupMsg.getMsg(), "code");
+        wrapper.eq(PermitDetail::getQqNumber, qqNumber/*获取被at人qq*/);
         MsgSenderHelper senderHelper = MsgSenderHelper.getInstance(groupMsg, sender);
         PermitDetail detail = permitDetailService.getOne(wrapper);
         if (detail == null){
-            detail = new PermitDetail(senderHelper.getNumber(), 1);
+            detail = new PermitDetail(qqNumber, 1);
         }
         if (groupMsg.getAccountInfo().getAccountCode().equals(detail.getQqNumber())) {
-            senderHelper.sendMsg("自己改自己权限是吧");
+            senderHelper.GROUP.sendMsg("自己改自己权限是吧");
             return;//操作人和被操作人不能为同一人
         }
         if (!Objects.equals(detail.getPermit(), position)){
             detail.setPermit(position);
-            senderHelper.sendMsg("已将[" + detail.getQqNumber() +"]权限设置为" + Permit.getEnumByValue(position).name());
+            senderHelper.GROUP.sendMsg("已将[" + detail.getQqNumber() +"]权限设置为" + Permit.getEnumByValue(position).name());
             permitDetailService.saveOrUpdate(detail);
             log.info("权限变更: [{}]({}) -> {}", detail.getQqNumber(), detail.getPermit(), position);
         }else {
-            senderHelper.sendMsg("["+ detail.getQqNumber() + "]权限已是" + Permit.getEnumByValue(position).name() + "不能重复设置");
+            senderHelper.GROUP.sendMsg("["+ detail.getQqNumber() + "]权限已是" + Permit.getEnumByValue(position).name() + "不能重复设置");
         }
     }
 }

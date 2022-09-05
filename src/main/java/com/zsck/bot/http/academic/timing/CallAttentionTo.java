@@ -49,7 +49,7 @@ public class CallAttentionTo {
     private void init(){
         bot = botManager.getDefaultBot();
         scheduledExecutorService = Executors.newScheduledThreadPool(5);
-        senderHelper = MsgSenderHelper.getInstance(host, bot.getSender(), MsgType.PRIVATE);
+        senderHelper = MsgSenderHelper.getInstance(bot.getSender(), MsgType.PRIVATE, host);
     }
 
     //0 40 7 * * 1-5
@@ -59,7 +59,7 @@ public class CallAttentionTo {
         Date firstDate = scheduleService.getFirstDate();
         Date date = Date.valueOf(DateUtil.today());
         if (date.before(firstDate)) {
-            senderHelper.priMsg("当前正处于假期，距离开学还有" +DateUtil.between(date , firstDate , DateUnit.DAY , true) + "天" );
+            senderHelper.PRIVATE.sendMsg("当前正处于假期，距离开学还有" +DateUtil.between(date , firstDate , DateUnit.DAY , true) + "天" );
         }else {
             long gap = DateUtil.between(firstDate, date, DateUnit.DAY, true);
             List<Schedule> scheduleList = scheduleService.getScheduleByDate(date);
@@ -75,7 +75,7 @@ public class CallAttentionTo {
                     return;
                 }
             }
-            senderHelper.priMsg("今日为:" + date +", 第:" + (gap/7 + 1) + "周");
+            senderHelper.PRIVATE.sendMsg("今日为:" + date +", 第:" + (gap/7 + 1) + "周");
             ClassTableResolver.sendCourseDetail(host , bot.getSender() , scheduleList);
         }
     }
@@ -90,7 +90,7 @@ public class CallAttentionTo {
             if (scheduleList.isEmpty()){
                 return;
             }
-            senderHelper.priMsg("明日为:" + date +", 第:" + (gap/7 + 1) + "周");
+            senderHelper.PRIVATE.sendMsg("明日为:" + date +", 第:" + (gap/7 + 1) + "周");
             ClassTableResolver.sendCourseDetail(host , bot.getSender() , scheduleList);
         }
     }

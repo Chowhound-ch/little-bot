@@ -2,7 +2,6 @@ package com.zsck.bot.http.mihoyo.sign.listener;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.zsck.bot.enums.MsgType;
 import com.zsck.bot.helper.MsgSenderHelper;
 import com.zsck.bot.http.mihoyo.sign.GenShinSign;
 import com.zsck.bot.http.mihoyo.sign.exception.GenShinNoSuchUIDException;
@@ -63,13 +62,13 @@ public class GenShinSignListener {
         wrapper.eq(GenshinInfo::getQqNumber, qqNumber);
         List<GenshinInfo> list = genshinService.list(wrapper);
         if (list.isEmpty()){
-            senderHelper.groupMsg("[CAT:at,code=" + qqNumber + "]你当前还没有绑定原神账号呢");
+            senderHelper.GROUP.sendMsg("[CAT:at,code=" + qqNumber + "]你当前还没有绑定原神账号呢");
         } else {
             MiraiMessageContentBuilder forwardBuilder = miraiFactory.getMessageContentBuilder();
             forwardBuilder.forwardMessage( fun ->{
                 list.forEach( info -> fun.add(groupMsg.getBotInfo(), genShinSign.doSign(info)));
             });
-            senderHelper.groupMsg(forwardBuilder.build());
+            senderHelper.GROUP.sendMsg(forwardBuilder.build());
         }
     }
 
@@ -77,23 +76,22 @@ public class GenShinSignListener {
     @OnGroup
     public void unbindGenshin(GroupMsg groupMsg, MsgSender sender, ListenerContext context) {
         MsgSenderHelper senderHelper = MsgSenderHelper.getInstance(groupMsg, sender);
-        MsgSenderHelper privateSender = MsgSenderHelper.getInstance(groupMsg.getAccountInfo().getAccountCode(), sender, MsgType.PRIVATE);
 
         MessageContentBuilder builder = factory.getMessageContentBuilder();
-        builder.at(privateSender.getNumber());
-        String key = KEY_START + ":" + privateSender.getNumber();
+        builder.at(senderHelper.getQqNumber());
+        String key = KEY_START + ":" + senderHelper.getQqNumber();
 
-        senderHelper.groupMsg("请在私聊中完成后续操作");
+        senderHelper.GROUP.sendMsg("请在私聊中完成后续操作");
 
 
         LambdaQueryWrapper<GenshinInfo> listWrapper = new LambdaQueryWrapper<>();
-        listWrapper.eq(GenshinInfo::getQqNumber, privateSender.getNumber());
+        listWrapper.eq(GenshinInfo::getQqNumber, senderHelper.getQqNumber());
         List<GenshinInfo> list = genshinService.list(listWrapper);
         if (!list.isEmpty()) {
             StringBuffer infoDetail = new StringBuffer("当前已绑定的账号如下:\n");
             list.forEach(info -> infoDetail.append(info.getUid()).append(" : ").append(info.getNickName()).append("\n"));
             infoDetail.append("请选择要删除的账号的uid");
-            privateSender.priMsg(infoDetail.toString());
+            senderHelper.PRIVATE.sendMsg(infoDetail.toString());
 
             ContinuousSessionScopeContext scopeContext = (ContinuousSessionScopeContext) context.getContext(ListenerContext.Scope.CONTINUOUS_SESSION);
             SessionCallback<String> callback = SessionCallback.builder(String.class).onResume(uid -> {
@@ -111,20 +109,20 @@ public class GenShinSignListener {
                     genshinService.remove(wrapper);
                     StringBuffer buffer = new StringBuffer("成功解绑原神账号:");
                     buffer.append(uid).append(" : ").append(des.get().getNickName());
-                    privateSender.priMsg(buffer.toString());
+                    senderHelper.PRIVATE.sendMsg(buffer.toString());
                 } else {
-                    privateSender.priMsg("无效的uid");
+                    senderHelper.PRIVATE.sendMsg("无效的uid");
                 }
             }).onError(exception -> {
                 if (exception instanceof TimeoutCancellationException){
-                    privateSender.priMsg("超时啦，如若继续请再次尝试");
+                    senderHelper.PRIVATE.sendMsg("超时啦，如若继续请再次尝试");
                 }else {
-                    privateSender.priMsg("未知错误，已终止操作");
+                    senderHelper.PRIVATE.sendMsg("未知错误，已终止操作");
                 }
             }).build();
             scopeContext.waiting(GENSHIN_SIGN_CHOOSE_UID, key, 120000, callback);
         }else {
-            senderHelper.groupMsg("当前账号为绑定原神账号");
+            senderHelper.GROUP.sendMsg("当前账号为绑定原神账号");
         }
     }
 
@@ -133,12 +131,11 @@ public class GenShinSignListener {
     @OnGroup
     public void bindGenshin(GroupMsg groupMsg, MsgSender sender, ListenerContext context) {
         MsgSenderHelper senderHelper = MsgSenderHelper.getInstance(groupMsg, sender);
-        MsgSenderHelper privateSender = MsgSenderHelper.getInstance(groupMsg.getAccountInfo().getAccountCode(), sender, MsgType.PRIVATE);
 
         MessageContentBuilder builder = factory.getMessageContentBuilder();
-        builder.at(privateSender.getNumber());
+        builder.at(senderHelper.getQqNumber());
 
-        String key = KEY_START + ":" + privateSender.getNumber();
+        String key = KEY_START + ":" + senderHelper.getQqNumber();
 
         ContinuousSessionScopeContext scopeContext = (ContinuousSessionScopeContext) context.getContext(ListenerContext.Scope.CONTINUOUS_SESSION);
         SessionCallback<String> callback = SessionCallback.builder(String.class).onResume( cookie ->{
@@ -148,13 +145,13 @@ public class GenShinSignListener {
                 //只有一个账号，直接保存
                 saveGenshinInfo(infoList.get(0));
 
-                senderHelper.groupMsg("[CAT:at,code=" + privateSender.getNumber() + "]绑定成功,uid:" + infoList.get(0).getUid());
+                senderHelper.GROUP.sendMsg("[CAT:at,code=" + senderHelper.getQqNumber() + "]绑定成功,uid:" + infoList.get(0).getUid());
             }else {
                 //发送待确认信息
-                privateSender.priMsg("请发送需要绑定的原神账号的uid");
+                senderHelper.PRIVATE.sendMsg("请发送需要绑定的原神账号的uid");
                 StringBuffer buffer = new StringBuffer("可选项\n");
                 infoList.forEach( res -> buffer.append(res.getUid()).append(":").append(res.getNickName()).append("\n"));
-                privateSender.priMsg(buffer.toString());
+                senderHelper.PRIVATE.sendMsg(buffer.toString());
 
                 //再次开启一个会话，获得uid
                 SessionCallback<String> uidCallback = SessionCallback.builder(String.class).onResume(uid -> {
@@ -167,18 +164,18 @@ public class GenShinSignListener {
                         throw new GenShinNoSuchUIDException("cookie中未查询到指定uid，请重新发送需要绑定的uid");
                     }
 
-                    info.get().setQqNumber(privateSender.getNumber());
+                    info.get().setQqNumber(senderHelper.getQqNumber());
 
                     saveGenshinInfo(info.get());
 
-                    senderHelper.groupMsg("[CAT:at,code=" + privateSender.getNumber() + "]绑定成功,uid:" + info.get().getUid());
+                    senderHelper.GROUP.sendMsg("[CAT:at,code=" + senderHelper.getQqNumber() + "]绑定成功,uid:" + info.get().getUid());
 
                 }).onError( exception -> {
                     if (exception instanceof TimeoutCancellationException){
-                        senderHelper.groupMsg("[CAT:at,code=" + privateSender.getNumber() + "]超时啦，若想继续绑定原神账号请再次发送 绑定原神账号 触发会话");
+                        senderHelper.GROUP.sendMsg("[CAT:at,code=" + senderHelper.getQqNumber() + "]超时啦，若想继续绑定原神账号请再次发送 绑定原神账号 触发会话");
                         return;
                     }else if (exception instanceof GenShinNoSuchUIDException){
-                        senderHelper.groupMsg("[CAT:at,code=" + privateSender.getNumber() + "]" + exception.getMessage());
+                        senderHelper.GROUP.sendMsg("[CAT:at,code=" + senderHelper.getQqNumber() + "]" + exception.getMessage());
                     }
                 }).build();
                 scopeContext.waiting(GENSHIN_SIGN_CHOOSE_UID, key, 120000, uidCallback);
@@ -186,15 +183,15 @@ public class GenShinSignListener {
 
         }).onError(exception -> {
             if (exception instanceof TimeoutCancellationException){
-                senderHelper.groupMsg("[CAT:at,code=" + privateSender.getNumber() + "]超时啦，若想继续绑定原神账号请再次发送 绑定原神账号 触发会话");
+                senderHelper.GROUP.sendMsg("[CAT:at,code=" + senderHelper.getQqNumber() + "]超时啦，若想继续绑定原神账号请再次发送 绑定原神账号 触发会话");
                 return;
             }
-            senderHelper.groupMsg("[CAT:at,code=" + privateSender.getNumber() + "]cookie无效");
+            senderHelper.GROUP.sendMsg("[CAT:at,code=" + senderHelper.getQqNumber() + "]cookie无效");
         }).build();
 
         scopeContext.waiting(GENSHIN_SIGN, key,300000 , callback);
 
-        senderHelper.groupMsg("[CAT:at,code=" + privateSender.getNumber() + "]请私发米游社登录cookie到本账号\n (注:若担心隐私泄露建议停止操作)");
+        senderHelper.GROUP.sendMsg("[CAT:at,code=" + senderHelper.getQqNumber() + "]请私发米游社登录cookie到本账号\n (注:若担心隐私泄露建议停止操作)");
     }
 
     private void saveGenshinInfo(GenshinInfo info){
@@ -220,11 +217,11 @@ public class GenShinSignListener {
         MsgSenderHelper senderHelper = MsgSenderHelper.getInstance(privateMsg, sender);
 
         // 拼接出来这个人对应的唯一key
-        String key = KEY_START + ":" + senderHelper.getNumber();
+        String key = KEY_START + ":" + senderHelper.getQqNumber();
 
         session.push(GENSHIN_SIGN, key, privateMsg.getText());
 
-        senderHelper.priMsg("成功收到cookie，正在检查cookie有效性");
+        senderHelper.PRIVATE.sendMsg("成功收到cookie，正在检查cookie有效性");
     }
     @Filter(value = "^[1-5]\\d{8}", matchType = MatchType.REGEX_MATCHES)
     @OnPrivate
@@ -236,11 +233,11 @@ public class GenShinSignListener {
         MsgSenderHelper senderHelper = MsgSenderHelper.getInstance(privateMsg, sender);
 
         // 拼接出来这个人对应的唯一key
-        String key = KEY_START + ":" + senderHelper.getNumber();
+        String key = KEY_START + ":" + senderHelper.getQqNumber();
 
         session.push(GENSHIN_SIGN_CHOOSE_UID, key, privateMsg.getText());
 
-        senderHelper.priMsg("选择成功，正在绑定原神账号");
+        senderHelper.PRIVATE.sendMsg("选择成功，正在绑定原神账号");
     }
 
 }

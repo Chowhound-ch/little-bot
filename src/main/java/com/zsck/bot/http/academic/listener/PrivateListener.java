@@ -51,7 +51,7 @@ public class PrivateListener {
         MsgSenderHelper senderHelper = MsgSenderHelper.getInstance(privateMsg, sender);
         List<Schedule> scheduleList = scheduleService.getScheduleByWeekIndex(Integer.valueOf(privateMsg.getText()));
         if (scheduleList.isEmpty()){
-            senderHelper.priMsg("没有查到第" + privateMsg.getText() + "周的课表呢");
+            senderHelper.PRIVATE.sendMsg("没有查到第" + privateMsg.getText() + "周的课表呢");
             return;
         }
         ClassTableResolver.sendCourseDetail(privateMsg.getAccountInfo().getAccountCode() , sender , scheduleList);
@@ -72,17 +72,17 @@ public class PrivateListener {
 
         Long gap = DateUtil.between(firstDate, date, DateUnit.DAY, false) / 7 + balance.value;
         if ( !scheduleService.hasClass(gap.intValue()) ){
-            senderHelper.priMsg(balance.getWeek() + "无课程");
+            senderHelper.PRIVATE.sendMsg(balance.getWeek() + "无课程");
             return;
         }
         if (gap >= 0) {
-            senderHelper.priMsg(balance.getWeek() + "为第" + gap + "周");
+            senderHelper.PRIVATE.sendMsg(balance.getWeek() + "为第" + gap + "周");
         }else {
-            senderHelper.priMsg(balance.getWeek() + "尚未开学,距离开学还有" + DateUtil.between(date , firstDate , DateUnit.DAY , true) + "天");
+            senderHelper.PRIVATE.sendMsg(balance.getWeek() + "尚未开学,距离开学还有" + DateUtil.between(date , firstDate , DateUnit.DAY , true) + "天");
         }
         List<Schedule> scheduleList = scheduleService.getScheduleByWeekIndex(gap.intValue());
         if (scheduleList.isEmpty()){
-            senderHelper.priMsg(balance.getWeek() + "暂无课程(周次:"+ gap +")");
+            senderHelper.PRIVATE.sendMsg(balance.getWeek() + "暂无课程(周次:"+ gap +")");
         }
         ClassTableResolver.sendCourseDetail(privateMsg.getAccountInfo().getAccountCode() , sender , scheduleList);
     }
@@ -101,13 +101,13 @@ public class PrivateListener {
         Date date = balance.getDate();
 
         if (date.before(firstDate)) {
-            senderHelper.priMsg( "该日正处于假期，距离开学:" +DateUtil.between(date , firstDate , DateUnit.DAY , true) + "天" );
+            senderHelper.PRIVATE.sendMsg( "该日正处于假期，距离开学:" +DateUtil.between(date , firstDate , DateUnit.DAY , true) + "天" );
         }else {
             long gap = DateUtil.between(firstDate, date, DateUnit.DAY, true);
             List<Schedule> scheduleList = scheduleService.getScheduleByDate(date);
-            senderHelper.priMsg( balance.getDay() + "日期:" + date + ",属于第 " + (gap/7 + 1) + " 周");
+            senderHelper.PRIVATE.sendMsg( balance.getDay() + "日期:" + date + ",属于第 " + (gap/7 + 1) + " 周");
             if (scheduleList.isEmpty()){
-                senderHelper.priMsg("当日无课程");
+                senderHelper.PRIVATE.sendMsg("当日无课程");
                 return;
             }
             ClassTableResolver.sendCourseDetail(privateMsg.getAccountInfo().getAccountCode() , sender , scheduleList);
@@ -124,13 +124,13 @@ public class PrivateListener {
 
 
         if ( list.isEmpty()){
-            senderHelper.priMsg("未查询到符合条件的信息");
+            senderHelper.PRIVATE.sendMsg("未查询到符合条件的信息");
         }else {
             for (ClassMap classMap : list) {
                 Map<String, Object> classDetail = scheduleService.getClassDetail(classMap.getId());
                 MessageContent msg = AcademicHelper.getDetailMsg(classMap, classDetail);
 
-                senderHelper.priMsg(msg);
+                senderHelper.PRIVATE.sendMsg(msg);
             }
         }
     }
@@ -147,15 +147,15 @@ public class PrivateListener {
             long countClass = classNameService.count();
             if (scheduleService.remove(null)) {
                 log.info("删除原表schedule数据:" + countSch + "条");
-                senderHelper.priMsg("删除原表schedule数据:" + countSch + "条");
+                senderHelper.PRIVATE.sendMsg("删除原表schedule数据:" + countSch + "条");
             }
             if (classNameService.remove(null)) {
                 log.info("删除原表class_map数据:" + countClass +"条");
-                senderHelper.priMsg("删除原表class_map数据:" + countClass +"条");
+                senderHelper.PRIVATE.sendMsg("删除原表class_map数据:" + countClass +"条");
             }
             academic.init();
             log.info("刷新成功:");
-            senderHelper.priMsg("刷新成功");
+            senderHelper.PRIVATE.sendMsg("刷新成功");
         }catch (Exception e){
             e.printStackTrace();
         }

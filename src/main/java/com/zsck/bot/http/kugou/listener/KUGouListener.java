@@ -72,6 +72,7 @@ public class KUGouListener {
     @Filter(value = "^/点歌\\s*{{music}}" , matchType = MatchType.REGEX_MATCHES)
     @OnGroup
     public void getRandom(GroupMsg groupMsg, MsgSender sender, @FilterValue("music") String music){
+        MsgSenderHelper senderHelper = MsgSenderHelper.getInstance(groupMsg, sender);
         List<String> fileNames = getMusicByKeyword(music);
         if (fileNames == null) {//本地找不到，开始从酷狗搜索
             fileNames = KuGouMusic.getFileName(music);
@@ -95,11 +96,10 @@ public class KUGouListener {
                 }
             }
         });
-        String group = groupMsg.getGroupInfo().getGroupCode();
-        sender.SENDER.sendGroupMsg(group, builder.build());
+        senderHelper.GROUP.sendMsg(builder.build());
         if (! catCodes.isEmpty()) {
             for (String voice : catCodes) {
-                sender.SENDER.sendGroupMsg(group, voice);
+                senderHelper.GROUP.sendMsg(voice);
             }
         }
     }
@@ -107,12 +107,12 @@ public class KUGouListener {
     public void setMP3File(MessageGet msgGet, MsgSender sender, ListenerContext context){
         ScopeContext scopeContext = context.getContext(ListenerContext.Scope.GLOBAL);
         MsgSenderHelper senderHelper = MsgSenderHelper.getInstance(msgGet, sender);//获取(私聊|群聊)消息发送器
-        String key = senderHelper.getNumber() + ":" + msgGet.getAccountInfo().getAccountCode() + ":添加歌曲";
+        String key = senderHelper.getGroup()+ ":" + senderHelper.getQqNumber() + ":添加歌曲";
         String audioName = ((String) scopeContext.get(key));
         if (audioName != null) {
             String id = codeUtil.getParam(msgGet.getMsg(), "id");
             if (id != null) {
-                AdditionalApi<FileResult> fileRes = MiraiAdditionalApis.GETTER.getGroupFileById(senderHelper.getNumber(), id,  true);
+                AdditionalApi<FileResult> fileRes = MiraiAdditionalApis.GETTER.getGroupFileById(senderHelper.getGroup(), id,  true);
                 FileResult file = sender.GETTER.additionalExecute(fileRes);
                 //创建临时文件，以获取mp3文件的具体时长来确认如何分割二进制流以发送qq语音
                 File temp = new File(path + "temp.mp3");
@@ -124,7 +124,7 @@ public class KUGouListener {
                     Music music = setParam(audioName,DigestUtils.md5Hex(bytes), time );
                     KuGouMusic.keepMusicToDB(music, bytes);
                     log.info("自定义歌曲: {}.mp3", audioName);
-                    senderHelper.sendMsg("添加自定义歌曲:" + audioName);
+                    senderHelper.GROUP.sendMsg("添加自定义歌曲:" + audioName);
                     scopeContext.remove(key);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -144,14 +144,14 @@ public class KUGouListener {
                              ListenerContext context){
         ScopeContext scopeContext = context.getContext(ListenerContext.Scope.GLOBAL);
         MsgSenderHelper senderHelper = MsgSenderHelper.getInstance(groupMsg, sender);
-        String key =senderHelper.getNumber() + ":" + groupMsg.getAccountInfo().getAccountCode() + ":添加歌曲";
-        senderHelper.sendMsg("请发送MP3文件");
+        String key =senderHelper.getGroup() + ":" + senderHelper.getQqNumber() + ":添加歌曲";
+        senderHelper.GROUP.sendMsg("请发送MP3文件");
         scopeContext.set(key, author + " - " + music);
         Runnable runnable = ()->{//开设线程，设置会话持续时间, 默认60s
             try {
                 Thread.sleep(60000L);
                 if (scopeContext.remove(key) != null){
-                    senderHelper.sendMsg("会话超时，添加歌曲请再次发起会话");
+                    senderHelper.GROUP.sendMsg("会话超时，添加歌曲请再次发起会话");
                     log.info("会话失效: {}",key);
                 }
             } catch (InterruptedException e) {

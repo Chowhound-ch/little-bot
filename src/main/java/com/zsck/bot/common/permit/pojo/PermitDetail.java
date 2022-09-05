@@ -3,11 +3,13 @@ package com.zsck.bot.common.permit.pojo;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author QQ:825352674
  * @date 2022/8/13 - 13:34
  */
+@NoArgsConstructor
 @Data
 @TableName("permit_detail")
 public class PermitDetail {

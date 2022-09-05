@@ -50,7 +50,7 @@ public class SignTiming {
     @Scheduled(cron = "00 00 10 * * ?")
     //@Async
     public void sign(){
-        MsgSenderHelper senderHelper = MsgSenderHelper.getInstance(host, bot.getSender(), MsgType.PRIVATE);
+        MsgSenderHelper senderHelper = MsgSenderHelper.getInstance(bot.getSender(), MsgType.GROUP, "741359980");
         List<GenshinInfo> list = genshinService.list();
 
         MiraiMessageContentBuilder builder = factory.getMessageContentBuilder();
@@ -60,7 +60,7 @@ public class SignTiming {
             }
         });
         //TODO
-        bot.getSender().SENDER.sendGroupMsg( 741359980, builder.build());
+        senderHelper.GROUP.sendMsg(  builder.build());
         //senderHelper.priMsg(builder.build());
     }
 }

@@ -47,7 +47,7 @@ public class PermitsIntercept implements ListenerInterceptor {
         PermitDetail detail = getPermitDetail(msgGet.getAccountInfo().getAccountCode());
         //权限不足
         if (detail == null || detail.getPermit() < permits.value().getValue()){
-            senderHelper.sendMsg("权限不够，尝试联系管理员吧");
+            senderHelper.GROUP.sendMsg("权限不够，尝试联系管理员吧");
             return InterceptionType.INTERCEPT;
         }
         return InterceptionType.PASS;

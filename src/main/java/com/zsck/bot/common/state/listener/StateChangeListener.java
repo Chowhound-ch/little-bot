@@ -41,10 +41,10 @@ public class StateChangeListener {
             desStateEnum = GroupStateEnum.CLOSED;
         }
 
-        if (stateMapHelper.setState(senderHelper.getNumber(), desStateEnum)) {
-            senderHelper.groupMsg("修改成功,该群状态变更为" + desState);
+        if (stateMapHelper.setState(senderHelper.getGroup(), desStateEnum)) {
+            senderHelper.GROUP.sendMsg("修改成功,该群状态变更为" + desState);
         }else {
-            senderHelper.groupMsg("修改失败,该群状态已是" + desState);
+            senderHelper.GROUP.sendMsg("修改失败,该群状态已是" + desState);
         }
     }
 }
