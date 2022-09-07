@@ -33,10 +33,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * TODO: 待优化
  * @author QQ:825352674
  * @date 2022/8/11 - 19:33
  */
 
+@Deprecated
 @Slf4j
 @Component
 public class KuGouMusic {
