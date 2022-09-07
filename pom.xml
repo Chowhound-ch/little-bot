@@ -48,6 +48,12 @@
             <groupId>love.forte.simple-robot</groupId>
             <artifactId>component-mirai-spring-boot-starter</artifactId>
             <version>${simbot.version}</version>
+            <!--<exclusions>
+                <exclusion>
+                    <groupId>com.alibaba</groupId>
+                    <artifactId>fastjson</artifactId>
+                </exclusion>
+            </exclusions>-->
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

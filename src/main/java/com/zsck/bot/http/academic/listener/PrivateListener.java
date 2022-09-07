@@ -4,8 +4,8 @@ import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.zsck.bot.common.permit.annotation.BotPermits;
-import com.zsck.bot.helper.MsgSenderHelper;
 import com.zsck.bot.common.permit.enums.Permit;
+import com.zsck.bot.helper.MsgSenderHelper;
 import com.zsck.bot.http.academic.Academic;
 import com.zsck.bot.http.academic.AcademicHelper;
 import com.zsck.bot.http.academic.pojo.ClassMap;
@@ -43,7 +43,6 @@ public class PrivateListener {
     private ScheduleService scheduleService;
     @Autowired
     private ClassNameService classNameService;
-
 
     @Filter(value = "\\d{1,2}" , matchType = MatchType.REGEX_MATCHES)
     @OnPrivate

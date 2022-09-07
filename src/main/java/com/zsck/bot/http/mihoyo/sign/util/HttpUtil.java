@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * 每次使用不同的httpClient，故单独使用一个工具类
  * @author QQ:825352674
  * @date 2022/8/31 - 22:12
  */
