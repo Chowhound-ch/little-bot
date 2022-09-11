@@ -1,8 +1,6 @@
-package com.zsck.bot.http.kugou;
+package com.zsck.bot.http.kugou.pojo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.zsck.bot.http.kugou.pojo.Author;
-import com.zsck.bot.http.kugou.pojo.Music;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -35,9 +33,5 @@ public class MusicDetail extends Music {
     private String storeType;
     private String albumAudioId;
     private Boolean hasPrivilege;
-    private String playBackupUrl;
 
-    public MusicDetail(String tip) {
-        super(tip);
-    }
 }

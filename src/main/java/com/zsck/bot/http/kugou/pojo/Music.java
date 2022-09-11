@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 public class Music {
     private Integer id;
     private String audioName;
+    //@JsonProperty("songname")
     private String songName;
     @JsonProperty("img")
     private String imgUrl;
@@ -23,11 +24,17 @@ public class Music {
     private String author;
     @JsonProperty("timelength")
     private Integer time;
+    @JsonProperty("show_tips")
     private String tip;
     @TableId
     private String md5;
+    private String playBackupUrl;
 
-    public Music(String tip) {
-        this.tip = tip;
+    public Music(String audioName, String songName, String author, String md5, String playBackupUrl) {
+        this.audioName = audioName;
+        this.songName = songName;
+        this.author = author;
+        this.md5 = md5;
+        this.playBackupUrl = playBackupUrl;
     }
 }

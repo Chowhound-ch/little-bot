@@ -13,7 +13,6 @@ import org.apache.http.util.EntityUtils;
 
 import javax.annotation.Resource;
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * @author QQ:825352674
@@ -23,27 +22,88 @@ public abstract class HttpBase {
     @Resource
     protected ObjectMapper objectMapper;
     private CloseableHttpClient httpClient = HttpClients.createDefault();
-    private Map<String, String> map = null;
 
 
-    protected String doGetStr(String url) throws IOException {
+    private String doGetStr(String url, CloseableHttpClient httpClient) throws IOException {
         HttpGet httpGet = new HttpGet(url);
         httpGet = setHeader(httpGet);
         try (CloseableHttpResponse execute = httpClient.execute(httpGet)){
-
             return EntityUtils.toString(execute.getEntity());
         }
     }
+    private byte[] doGetBytes(String url, CloseableHttpClient httpClient) throws IOException {
+        HttpGet httpGet = new HttpGet(url);
+        httpGet = setHeader(httpGet);
+        try (CloseableHttpResponse execute = httpClient.execute(httpGet)){
+            return EntityUtils.toByteArray(execute.getEntity());
+        }
+    }
+    protected byte[] doGetBytes(String url, boolean isDefault) throws IOException {
+        if ( isDefault){
+            return doGetBytes(url, httpClient);
+        }else {
+            try(CloseableHttpClient closeableHttpClient = HttpClients.createDefault()) {
+                return doGetBytes(url, closeableHttpClient);
+            }
+        }
+    }
+    protected byte[] doGetBytes(String url) throws IOException {
+        return doGetBytes(url, true);
+    }
+
+
+    /**
+     *
+     * @param url
+     * @param isDefault 是否使用默认的httpclient
+     * @return
+     * @throws IOException
+     */
+    protected String doGetStr(String url, boolean isDefault) throws IOException {
+        if ( isDefault){
+            return doGetStr(url, httpClient);
+        }else {
+            try(CloseableHttpClient closeableHttpClient = HttpClients.createDefault()) {
+                return doGetStr(url, closeableHttpClient);
+            }
+        }
+    }
+    protected String doGetStr(String url) throws IOException {
+        return doGetStr(url, true);
+    }
 
     protected JsonNode doGetJson(String url) throws IOException {
-        return objectMapper.readTree( doGetStr(url));
+        return objectMapper.readTree( doGetStr(url, true));
     }
+    protected JsonNode doGetJson(String url, boolean isDefault) throws IOException {
+        return objectMapper.readTree(doGetStr(url, isDefault));
+    }
+
+
 
     protected JsonNode doPostJson(String url, AbstractHttpEntity entity) throws IOException {
-        return objectMapper.readTree(doPostStr(url, entity));
+        return objectMapper.readTree(doPostStr(url, entity, true));
     }
 
+    protected JsonNode doPostJson(String url, AbstractHttpEntity entity, boolean isDefault) throws IOException {
+        return objectMapper.readTree(doPostStr(url, entity, isDefault));
+    }
+
+
+
     protected String doPostStr(String url, AbstractHttpEntity entity) throws IOException {
+        return doPostStr(url, entity, true);
+    }
+    protected String doPostStr(String url, AbstractHttpEntity entity, boolean isDefault) throws IOException {
+        if (isDefault) {
+            return doPostStr(url, entity, httpClient);
+        }else {
+            try (CloseableHttpClient closeableHttpClient = HttpClients.createDefault()){
+                return doPostStr(url, entity, closeableHttpClient);
+            }
+        }
+    }
+    private String doPostStr(String url, AbstractHttpEntity entity, CloseableHttpClient httpClient) throws IOException {
         HttpPost httpPost = new HttpPost(url);
 
         httpPost = setHeader(httpPost);
