@@ -2,11 +2,11 @@ package com.zsck.bot.http;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
@@ -81,20 +81,20 @@ public abstract class HttpBase {
 
 
 
-    protected JsonNode doPostJson(String url, AbstractHttpEntity entity) throws IOException {
+    protected JsonNode doPostJson(String url, HttpEntity entity) throws IOException {
         return objectMapper.readTree(doPostStr(url, entity, true));
     }
 
-    protected JsonNode doPostJson(String url, AbstractHttpEntity entity, boolean isDefault) throws IOException {
+    protected JsonNode doPostJson(String url, HttpEntity entity, boolean isDefault) throws IOException {
         return objectMapper.readTree(doPostStr(url, entity, isDefault));
     }
 
 
 
-    protected String doPostStr(String url, AbstractHttpEntity entity) throws IOException {
+    protected String doPostStr(String url, HttpEntity entity) throws IOException {
         return doPostStr(url, entity, true);
     }
-    protected String doPostStr(String url, AbstractHttpEntity entity, boolean isDefault) throws IOException {
+    protected String doPostStr(String url, HttpEntity entity, boolean isDefault) throws IOException {
         if (isDefault) {
             return doPostStr(url, entity, httpClient);
         }else {
@@ -103,7 +103,7 @@ public abstract class HttpBase {
             }
         }
     }
-    private String doPostStr(String url, AbstractHttpEntity entity, CloseableHttpClient httpClient) throws IOException {
+    private String doPostStr(String url, HttpEntity entity, CloseableHttpClient httpClient) throws IOException {
         HttpPost httpPost = new HttpPost(url);
 
         httpPost = setHeader(httpPost);

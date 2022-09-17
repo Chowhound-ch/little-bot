@@ -3,4 +3,19 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zsck.bot.http.kugou.mapper.MusicMapper">
+    <resultMap id="BaseResultMap" type="com.zsck.bot.http.kugou.pojo.Music">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="url" column="url" jdbcType="VARCHAR"/>
+        <result property="audioName" column="audio_name" jdbcType="VARCHAR"/>
+        <result property="artist" column="artist" jdbcType="VARCHAR"/>
+        <result property="md5" column="md5" jdbcType="VARCHAR"/>
+    </resultMap>
+    <select id="likeAudioName" resultMap="BaseResultMap">
+        select  *
+        from (
+                 select id, REPLACE(audio_name, ' ', '') as audio_name, url, md5, artist, title
+                 from music table01
+             ) table02
+        where audio_name like CONCAT('%', #{audioName}, '%');
+    </select>
 </mapper>

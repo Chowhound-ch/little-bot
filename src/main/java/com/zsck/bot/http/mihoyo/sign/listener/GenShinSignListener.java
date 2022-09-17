@@ -24,7 +24,6 @@ import love.forte.simbot.component.mirai.message.MiraiMessageContentBuilderFacto
 import love.forte.simbot.filter.MatchType;
 import love.forte.simbot.listener.ContinuousSessionScopeContext;
 import love.forte.simbot.listener.ListenerContext;
-import love.forte.simbot.listener.ScopeContext;
 import love.forte.simbot.listener.SessionCallback;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
@@ -95,7 +94,6 @@ public class GenShinSignListener {
             senderHelper.PRIVATE.sendMsg(infoDetail.toString());
 
             ContinuousSessionScopeContext scopeContext = (ContinuousSessionScopeContext) context.getContext(ListenerContext.Scope.CONTINUOUS_SESSION);
-            ScopeContext global = context.getContext(ListenerContext.Scope.GLOBAL);
 
             context.getContext(ListenerContext.Scope.GLOBAL);
             SessionCallback<String> callback = SessionCallback.builder(String.class).onResume(uid -> {

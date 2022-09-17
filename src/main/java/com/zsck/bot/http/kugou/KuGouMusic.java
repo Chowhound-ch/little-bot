@@ -59,49 +59,6 @@ public class KuGouMusic extends HttpBase {
         return null;
     }
 
-    /*private List<String> readyForSender(String fileName, MusicDetail musicDetail){
-        List<String> list = getReady(musicDetail, musicDetail.getIsFreePart());
-        list.add(fileName);
-        return list;
-    }
-    public List<String> getReady(Music music, @Nullable Integer isPartFree*//*默认0*//*){
-        List<String> list = new ArrayList<>();
-        list.add("歌曲:" + (StrUtil.isBlankOrUndefined(music.getSongName())? "无法获取" :music.getSongName()));
-        list.add("歌手:" + music.getAuthor());
-        if (!StrUtil.isBlankOrUndefined(music.getTip())){
-            list.add(music.getTip());
-            return list;
-        }else {
-            if (!StrUtil.isBlankOrUndefined(music.getImgUrl())) {
-                list.add("url:" + music.getImgUrl());
-            }
-            if (isPartFree != null && isPartFree == 1){
-                list.add("tip: 歌曲为付费歌曲，仅可试听1分钟.欲听完整版请前往酷狗音乐app开通VIP");
-            }
-        }
-        return list;
-    }*/
-    /*public String keepMusicToDB(Music detail, byte[] bytes){
-        String fileName = path + detail.getAudioName() + ".mp3";
-
-        //文件存在则先删除，以更新MP3文件
-        FileUtil.del(fileName);
-        log.info("新增歌曲: {}", detail.getAudioName());
-
-        musicService.keepMusic(detail);
-        File file = new File(fileName);
-        try {
-            if (file.createNewFile()) {
-
-                Files.write(file.toPath(), bytes);
-
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return fileName;
-    }*/
     private MusicRes getMusicDetail(JsonNode searchResOne){
         String albumID = searchResOne.get("AlbumID").asText();
         String hash = searchResOne.get("FileHash").asText();

@@ -1,16 +1,14 @@
 package com.zsck.bot.http.kugou.listener;
 
 import catcode.CatCodeUtil;
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.http.HttpUtil;
 import com.zsck.bot.common.permit.annotation.BotPermits;
 import com.zsck.bot.common.permit.enums.Permit;
-import com.zsck.bot.common.permit.service.PermitDetailService;
 import com.zsck.bot.helper.MsgSenderHelper;
+import com.zsck.bot.http.kugou.HttpMusicSender;
 import com.zsck.bot.http.kugou.KuGouMusic;
 import com.zsck.bot.http.kugou.pojo.Music;
 import com.zsck.bot.http.kugou.service.MusicService;
-import com.zsck.bot.util.ContextUtil;
 import kotlinx.coroutines.TimeoutCancellationException;
 import lombok.extern.slf4j.Slf4j;
 import love.forte.simbot.annotation.*;
@@ -20,18 +18,14 @@ import love.forte.simbot.api.message.results.FileResult;
 import love.forte.simbot.api.sender.AdditionalApi;
 import love.forte.simbot.api.sender.MsgSender;
 import love.forte.simbot.component.mirai.additional.MiraiAdditionalApis;
-import love.forte.simbot.component.mirai.message.MiraiMessageContentBuilderFactory;
 import love.forte.simbot.filter.MatchType;
 import love.forte.simbot.listener.ContinuousSessionScopeContext;
 import love.forte.simbot.listener.ListenerContext;
 import love.forte.simbot.listener.SessionCallback;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Controller;
 
-import javax.annotation.PostConstruct;
 import java.io.File;
 import java.util.Objects;
 
@@ -44,38 +38,17 @@ import java.util.Objects;
 @ListenGroup("music")
 @Controller
 public class KuGouListener {
-    private String path;
-    private MiraiMessageContentBuilderFactory factory;
-    private CatCodeUtil codeUtil;
+    private final CatCodeUtil codeUtil = CatCodeUtil.getInstance();
     @Autowired
     private MusicService musicService;
     @Autowired
-    private PermitDetailService permitDetailService;
-    @Autowired
     private KuGouMusic kuGouMusic;
+    @Autowired
+    private HttpMusicSender musicSender;
 
-    @Value("${com.zsck.data.domain}")
-    private String domain;
 
     private final static String KEY_START = "==KEY_START==";
     private final static String KUGOU_MUSIC = "GENSHIN_SIGN:COOKIE";
-
-
-    @PostConstruct
-    private void init(){
-        path = kuGouMusic.path;
-        factory = ContextUtil.getForwardBuilderFactory();
-        codeUtil = CatCodeUtil.getInstance();
-    }
-
-   /* @ExcludeGroupState
-    @OnGroup
-    public void testMusic(GroupMsg groupMsg, MsgSender sender){
-       // System.out.println(groupMsg.getMsg());
-        System.out.println(groupMsg.getMsg());
-        Music byId = musicService.getById(20);
-        sender.SENDER.sendGroupMsg(groupMsg.getGroupInfo().getGroupCode(), getKuGouMsg(byId));
-    }*/
 
 
     @Filter(value = "^/点歌\\s*{{keyword}}" , matchType = MatchType.REGEX_MATCHES)
@@ -97,8 +70,8 @@ public class KuGouListener {
 
     private String getKuGouMsg(Music music) {
         return "[CAT:other,code=&#91;mirai:origin:MUSIC_SHARE&#93;][CAT:music,kind=kugou," +
-                "musicUrl=" + music.getPlayBackupUrl() +//mp3文件url
-                ",title=" + music.getSongName() +
+                "musicUrl=" + music.getUrl() +//mp3文件url
+                ",title=" + music.getTitle() +
                 ",jumpUrl=https://www.kugou.com/song/#hash&#61;&amp;album_id&#61;48534841," +
                 "pictureUrl=" + music.getImgUrl() + ",summary=" + music.getAudioName() + ",brief=&#91;分享&#93;" +
                 music.getAudioName() + "]";
@@ -131,29 +104,20 @@ public class KuGouListener {
     }
 
     @BotPermits(Permit.MANAGER)//例如: /添加 love story - TaylorSwifter
-    @Filter(value = "^/添加\\s*{{music,[^-]+}}\\s*-+\\s*{{author,[^-]+}}\\s*" , matchType = MatchType.REGEX_MATCHES)
+    @Filter(value = "/添加歌曲" , matchType = MatchType.EQUALS)
     @OnGroup
-    public void setMP3Detail(GroupMsg groupMsg, MsgSender sender,
-                             @FilterValue("music")String music,
-                             @FilterValue("author")String author,
-                             ListenerContext context){
+    public void setMP3Detail(GroupMsg groupMsg, MsgSender sender, ListenerContext context){
         ContinuousSessionScopeContext scopeContext = (ContinuousSessionScopeContext)context.getContext(ListenerContext.Scope.CONTINUOUS_SESSION);
         MsgSenderHelper senderHelper = MsgSenderHelper.getInstance(groupMsg, sender);
 
         String key = KEY_START + senderHelper.getQqNumber() + KUGOU_MUSIC;
-        String audioName = author + " - " + music;
 
-        senderHelper.GROUP.sendMsg("请发送MP3文件");
+        senderHelper.GROUP.sendMsg("请发送MP3文件或zip压缩的mp3文件压缩包");
         SessionCallback<File> callback = SessionCallback.builder(File.class).onResume( file ->{
-            File desFile = new File(kuGouMusic.path + audioName + ".mp3");
-            if (file.renameTo(desFile)) {
-                Music musicRes = new Music(audioName, music, author, DigestUtils.md5Hex(FileUtil.readBytes(desFile)), domain + "/static/" + desFile.getName());
-                musicService.keepMusic(musicRes);
-                senderHelper.GROUP.sendMsg("成功添加歌曲" + music);
-            }else {
-                senderHelper.GROUP.sendMsg("添加歌曲" + music + "失败");
-                file.deleteOnExit();
-            }
+
+            //将添加的mp3文件或mp3文件的zip压缩包发送至文件管理项目
+            musicSender.sendMusicFile(file);
+
         } ).onError(exception -> {
             if (exception instanceof TimeoutCancellationException){
                 senderHelper.GROUP.sendMsg("操作超时");

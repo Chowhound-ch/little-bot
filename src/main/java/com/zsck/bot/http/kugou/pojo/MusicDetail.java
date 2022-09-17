@@ -13,6 +13,8 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 public class MusicDetail extends Music {
+    @JsonProperty("timelength")
+    private Integer time;
     private String hash;
     @JsonProperty("filesize")
     private Integer fileSize;
@@ -33,5 +35,7 @@ public class MusicDetail extends Music {
     private String storeType;
     private String albumAudioId;
     private Boolean hasPrivilege;
+    @JsonProperty("show_tips")
+    private String tip;
 
 }

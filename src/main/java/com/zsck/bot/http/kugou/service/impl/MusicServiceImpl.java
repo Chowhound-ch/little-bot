@@ -18,13 +18,12 @@ public class MusicServiceImpl extends ServiceImpl<MusicMapper, Music> implements
         LambdaQueryWrapper<Music> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Music::getAudioName, music.getAudioName()).or( con-> con.eq(Music::getMd5, music.getMd5()));
         remove(wrapper);//删除原有行
-        saveOrUpdate(music);
+        save(music);
     }
 
     @Override
     public Music likeMusic(String keyword) {
-        LambdaQueryWrapper<Music> wrapper = new LambdaQueryWrapper<>();
-        wrapper.like(Music::getAudioName , keyword);
-        return getOne(wrapper);
+
+        return baseMapper.likeAudioName(keyword);
     }
 }
