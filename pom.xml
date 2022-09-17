@@ -11,7 +11,7 @@
     <!-- lookup parent from repository -->
     <groupId>com.zsck.bot</groupId>
     <artifactId>bot-core</artifactId>
-    <version>0.0.8</version>
+    <version>0.0.10</version>
     <name>little-bot</name>
     <description>little-bot</description>
     <properties>
