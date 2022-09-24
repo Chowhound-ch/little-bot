@@ -14,5 +14,5 @@ public class MusicRes {
     private String songName;
     private String authorName;
     @JsonProperty("data")
-    private MusicDetail musicDetail;
+    private Music music;
 }

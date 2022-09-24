@@ -1,7 +1,8 @@
 package com.zsck.bot.http.kugou.listener;
 
 import catcode.CatCodeUtil;
-import cn.hutool.http.HttpUtil;
+import cn.hutool.core.util.StrUtil;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.zsck.bot.common.permit.annotation.BotPermits;
 import com.zsck.bot.common.permit.enums.Permit;
 import com.zsck.bot.helper.MsgSenderHelper;
@@ -12,8 +13,11 @@ import com.zsck.bot.http.kugou.service.MusicService;
 import kotlinx.coroutines.TimeoutCancellationException;
 import lombok.extern.slf4j.Slf4j;
 import love.forte.simbot.annotation.*;
+import love.forte.simbot.api.message.MessageContentBuilder;
+import love.forte.simbot.api.message.MessageContentBuilderFactory;
 import love.forte.simbot.api.message.events.GroupMsg;
 import love.forte.simbot.api.message.events.MessageGet;
+import love.forte.simbot.api.message.results.FileInfo;
 import love.forte.simbot.api.message.results.FileResult;
 import love.forte.simbot.api.sender.AdditionalApi;
 import love.forte.simbot.api.sender.MsgSender;
@@ -26,8 +30,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Controller;
 
-import java.io.File;
-import java.util.Objects;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author QQ:825352674
@@ -45,28 +49,105 @@ public class KuGouListener {
     private KuGouMusic kuGouMusic;
     @Autowired
     private HttpMusicSender musicSender;
+    @Autowired
+    private MessageContentBuilderFactory factory;
 
 
     private final static String KEY_START = "==KEY_START==";
-    private final static String KUGOU_MUSIC = "GENSHIN_SIGN:COOKIE";
+    private final static String KUGOU_MUSIC = "KUGOU_MUSIC:UPLOAD_FILE";
+    private final static String KUGOU_CHOOSE_MUSIC = "KUGOU_MUSIC:KUGOU_CHOOSE_MUSIC";
 
 
-    @Filter(value = "^/点歌\\s*{{keyword}}" , matchType = MatchType.REGEX_MATCHES)
+    @Filter(value = "^/点歌\\s*({{param,(-d|D){0,1}}})\\s*{{keyword}}" , matchType = MatchType.REGEX_MATCHES)
     @OnGroup
-    public void getRandom(GroupMsg groupMsg, MsgSender sender, @FilterValue("keyword") String keyword){
+    public void getRandom(GroupMsg groupMsg, MsgSender sender,
+                          ListenerContext context,
+                          @FilterValue("param") String param,
+                          @FilterValue("keyword") String keyword){
         MsgSenderHelper senderHelper = MsgSenderHelper.getInstance(groupMsg, sender);
-        Music music = musicService.likeMusic(keyword);
+        AtomicReference<Music> desMusic = new AtomicReference<>();
+        List<Music> localMusic = musicService.likeMusic(keyword);
+        if (StrUtil.isBlankOrUndefined(param)){
+            if (!localMusic.isEmpty()) {
+                desMusic.set(localMusic.get(0));
+            }
 
-        if (music == null) {//本地找不到，开始从酷狗搜索
-            log.info("关键词: {}本地找不到，开始从酷狗搜索", keyword);
-            music = kuGouMusic.getFileName(keyword);
-        }
-        if (music.getImgUrl() == null){
-            music.setImgUrl(groupMsg.getAccountInfo().getAccountAvatar());
-        }
+            if (desMusic.get() == null) {//本地找不到，开始从酷狗搜索
+                log.info("关键词: {}本地找不到，开始从酷狗搜索", keyword);
+                desMusic.set(kuGouMusic.getOneMusicForUrl(keyword));
+            }
 
-        senderHelper.GROUP.sendMsg( getKuGouMsg(music) );
+            if (desMusic.get().getImgUrl() == null) {
+                desMusic.get().setImgUrl(groupMsg.getAccountInfo().getAccountAvatar());
+            }
+
+            senderHelper.GROUP.sendMsg(getKuGouMsg(desMusic.get()));
+        }else {
+            List<Music> netMusic = kuGouMusic.getFileNames(keyword, 5);
+            MessageContentBuilder builder = factory.getMessageContentBuilder();
+            builder.text("关键词:" + keyword + ",搜索结果:\n酷狗搜索:");
+            int i = 0;
+            for (Music music : netMusic){
+                i++;
+                builder.text("\n" + i + ". " + music.getAudioName());
+                music.setId(i);
+            }
+
+            builder.text("\n本地搜索:");
+            if (localMusic.isEmpty()){
+                builder.text("\n本地暂无记录");
+            }else {
+
+                for (Music music : localMusic) {
+                    i++;
+                    if (i >= 8){
+                        break;
+                    }
+                    builder.text("\n" + i + ". " + music.getAudioName());
+                    music.setId(i);
+                }
+            }
+
+            senderHelper.GROUP.sendMsg(builder.build());
+            ContinuousSessionScopeContext scopeContext = (ContinuousSessionScopeContext)context.getContext(ListenerContext.Scope.CONTINUOUS_SESSION);
+
+            SessionCallback<Integer> callback = SessionCallback.builder(Integer.class).onResume(id ->{
+
+                netMusic.addAll(localMusic);
+                for (Music music : netMusic){
+                    if (music.getId().equals(id)){
+                        desMusic.set(music);
+                    }
+                }
+
+                if (desMusic.get() != null) {
+                    if (desMusic.get().getUrl() == null){
+                        desMusic.set( kuGouMusic.getMusicUrlByAlbumIDAndHash( desMusic.get() ) );
+                    }
+
+                    if (desMusic.get().getImgUrl() == null) {
+                        desMusic.get().setImgUrl(groupMsg.getAccountInfo().getAccountAvatar());
+                    }
+
+                    senderHelper.GROUP.sendMsg(getKuGouMsg(desMusic.get()));
+                }else {
+                    senderHelper.GROUP.sendMsg("id错误");
+                }
+
+            } ).onError(exception -> {
+                if ( !(exception instanceof TimeoutCancellationException)){
+                    senderHelper.GROUP.sendMsg("未知错误");
+                    exception.printStackTrace();
+                }
+            }).build();
+
+            String key = KEY_START + senderHelper.getQqNumber() + KUGOU_CHOOSE_MUSIC;
+
+            scopeContext.waiting(KUGOU_CHOOSE_MUSIC, key, 60000, callback);
+        }
     }
+
+
 
     private String getKuGouMsg(Music music) {
         return "[CAT:other,code=&#91;mirai:origin:MUSIC_SHARE&#93;][CAT:music,kind=kugou," +
@@ -78,6 +159,16 @@ public class KuGouListener {
 
     }
 
+    @Filter(value = "[1-8]", matchType = MatchType.REGEX_MATCHES)
+    @OnlySession(group = KUGOU_CHOOSE_MUSIC)
+    @OnGroup
+    public void getMusicId(GroupMsg msgGet, ListenerContext context){
+        ContinuousSessionScopeContext scopeContext = (ContinuousSessionScopeContext)context.getContext(ListenerContext.Scope.CONTINUOUS_SESSION);
+        String key = KEY_START + msgGet.getAccountInfo().getAccountCode() + KUGOU_CHOOSE_MUSIC;
+
+        scopeContext.push(KUGOU_CHOOSE_MUSIC, key, Integer.parseInt(msgGet.getText()));
+
+    }
     @OnlySession(group = KUGOU_MUSIC)
     @Filters(customFilter = "catFilter")
     @OnGroup
@@ -91,14 +182,12 @@ public class KuGouListener {
             AdditionalApi<FileResult> fileApi = MiraiAdditionalApis.GETTER.getGroupFileById(senderHelper.getGroup(), id,  true);
 
             FileResult fileRes = sender.GETTER.additionalExecute(fileApi);
-            //创建临时文件，以获取mp3文件的具体时长来确认如何分割二进制流以发送qq语音
-            File file = new File(kuGouMusic.path + fileRes.getValue().getName());
-            HttpUtil.downloadFile(Objects.requireNonNull(fileRes.getValue().getUrl()), file);
+            //创建临时文件
 
-            log.info("自定义歌曲: {}.mp3", file.getName());
-            senderHelper.GROUP.sendMsg("添加自定义歌曲:" + file.getName());
+            log.info("自定义歌曲: {}", fileRes.getValue().getName());
+            senderHelper.GROUP.sendMsg("添加自定义歌曲:" + fileRes.getValue().getName());
 
-            scopeContext.push(KUGOU_MUSIC, key, file);
+            scopeContext.push(KUGOU_MUSIC, key, fileRes.getValue());
 
         }
     }
@@ -112,22 +201,24 @@ public class KuGouListener {
 
         String key = KEY_START + senderHelper.getQqNumber() + KUGOU_MUSIC;
 
-        senderHelper.GROUP.sendMsg("请发送MP3文件或zip压缩的mp3文件压缩包");
-        SessionCallback<File> callback = SessionCallback.builder(File.class).onResume( file ->{
+        senderHelper.GROUP.sendMsg("请发送MP3或flac文件或对应的zip压缩包");
+        SessionCallback<FileInfo> callback = SessionCallback.builder(FileInfo.class).onResume(file ->{
+            MessageContentBuilder builder = factory.getMessageContentBuilder();
 
             //将添加的mp3文件或mp3文件的zip压缩包发送至文件管理项目
-            musicSender.sendMusicFile(file);
+            JsonNode jsonNode = musicSender.sendMusicDetail(file.getUrl(), file.getName());
+            jsonNode.forEach( node-> builder.text(node.asText() + "\n"));
+
+            senderHelper.GROUP.sendMsg(builder.build());
 
         } ).onError(exception -> {
-            if (exception instanceof TimeoutCancellationException){
-                senderHelper.GROUP.sendMsg("操作超时");
-            }else {
+            if ( !(exception instanceof TimeoutCancellationException)){
                 senderHelper.GROUP.sendMsg("未知错误");
                 exception.printStackTrace();
             }
         }).build();
 
-        scopeContext.waiting(KUGOU_MUSIC, key, 120000, callback);
+        scopeContext.waiting(KUGOU_MUSIC, key, 300000, callback);
     }
 
 }

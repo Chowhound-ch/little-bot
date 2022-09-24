@@ -7,6 +7,8 @@ import com.zsck.bot.http.kugou.service.MusicService;
 import com.zsck.bot.http.kugou.mapper.MusicMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * @author QQ:825352674
  * @date 2022/8/12 - 21:12
@@ -22,7 +24,7 @@ public class MusicServiceImpl extends ServiceImpl<MusicMapper, Music> implements
     }
 
     @Override
-    public Music likeMusic(String keyword) {
+    public List<Music> likeMusic(String keyword) {
 
         return baseMapper.likeAudioName(keyword);
     }

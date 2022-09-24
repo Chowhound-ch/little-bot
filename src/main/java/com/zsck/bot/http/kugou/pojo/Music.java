@@ -30,11 +30,23 @@ public class Music {
     @JsonProperty("img")
     private String imgUrl;
 
+    @TableField(exist = false)
+    private String fileHash;
+    @TableField(exist = false)
+    private String albumID;
+
+
     public Music(String audioName, String songName, String artist, String md5, String url) {
         this.audioName = audioName;
         this.title = songName;
         this.artist = artist;
         this.md5 = md5;
         this.url = url;
+    }
+
+    public Music(String audioName, String fileHash, String albumID) {
+        this.audioName = audioName;
+        this.fileHash = fileHash;
+        this.albumID = albumID;
     }
 }
